@@ -1,6 +1,6 @@
 
-all: clean compile_gdb
-
+#all: clean compile_gdb
+all: compile_gdb
 
 compile:
 	gcc -O3 spice.c -o spice
