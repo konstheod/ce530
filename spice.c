@@ -72,7 +72,7 @@ int main(int argc, char *argv[]){
 		while(i<check){
 
 			if(input[i] == '\n'){
-				printf("\n");
+				//printf("\n");
 				j++;
 				i++;
 				continue;
@@ -290,10 +290,10 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
-					if(curr->name[k] == 'D'){
+					if(curr->type == 'D'){
 						curr->pos = probe;
 					}
-					else if(curr->name[k] == 'Q'){
+					else if(curr->type == 'Q'){
 						curr->C = probe;	
 					}
 					else{
@@ -332,10 +332,10 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
-					if(curr->name[k] == 'D'){
+					if(curr->type == 'D'){
 						curr->neg = probe;
 					}
-					else if(curr->name[k] == 'Q'){
+					else if(curr->type == 'Q'){
 						curr->B = probe;	
 					}
 					else{
@@ -344,7 +344,7 @@ int main(int argc, char *argv[]){
 
 
 					//if not diode it has at least one more probe
-					if(curr->name[k] != 'D'){
+					if(curr->type != 'D'){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
@@ -376,7 +376,7 @@ int main(int argc, char *argv[]){
 								i = 0;
 							}
 						}
-						if(curr->name[k] == 'Q'){
+						if(curr->type == 'Q'){
 							curr->E = probe;	
 						}
 						else{
@@ -448,7 +448,7 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
-					printf("\nINPUT\n%s\n\n", input );
+
 					printf(" %s", curr->model_name);
 					if(curr->type != 'M'){
 						//find whitespaces before area if exists
@@ -564,11 +564,9 @@ int main(int argc, char *argv[]){
 							k++;
 						}
 						curr->W = atof(curr_value);
-						printf(" %lf\n", curr->W);
+						printf(" %lf", curr->W);
 					}
 					printf("\n");
-
-
 				}
 			}
 
