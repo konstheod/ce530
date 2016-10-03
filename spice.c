@@ -43,8 +43,12 @@ int main(int argc, char *argv[]){
 	//We ask for the file name of the circuit.
 	printf("Give me the exact file name: ");
 	scanf("%s",file_name );
-	strcpy(file_name, "transistor_circuit.netlist");
 	
+	//strcpy(file_name, "circuit1.netlist");
+	//strcpy(file_name, "circuit1_abnormal.netlist");
+	strcpy(file_name, "transistor_circuit.netlist");
+	//strcpy(file_name, "transistor_circuit_abnormal.netlist");
+
 	printf("The file that you gave me is \"%s\"\n\n",file_name );
 	
 	//We open the file where the circuit is.
