@@ -34,10 +34,12 @@ int main(int argc, char *argv[]){
 	int k, i, j=1;
 	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
 	char node_name[NODE_SIZE];
-	struct element *head, *curr;
+	struct element *head, *curr, *tail;
 	struct node *hash_head;
 	hash_head = NULL;
 	head = NULL;
+	tail = NULL;
+	curr = NULL;
 
 	while(1){
 		check = read(fd, input, 100);
@@ -86,8 +88,16 @@ int main(int argc, char *argv[]){
 				}
 				
 				if(head != NULL){
-					curr->next = head;
-					head = curr;
+					if(tail!=NULL){
+						tail->next = curr;
+						curr->next = NULL;
+						tail = curr;
+					}
+					else{
+						tail = curr;
+						head->next = curr;
+						tail->next = NULL;
+					}
 				} 
 				else {
 					head = curr;
