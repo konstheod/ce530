@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
 		return(-1);
 	}
 
-	int k, i, j=1, probe;
+	int k, i, j=1;
 	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
 	char node_name[NODE_SIZE];
 	struct element *head, *curr;
@@ -162,7 +162,6 @@ int main(int argc, char *argv[]){
 						}
 					}
 					curr->pos = add_node(node_name, &hash_head);
-					printf("HASH_HEAD %p\n",hash_head);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -198,7 +197,6 @@ int main(int argc, char *argv[]){
 						}
 					}
 					curr->neg = add_node(node_name, &hash_head);
-					printf("HASH_HEAD %p\n", hash_head);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -284,12 +282,15 @@ int main(int argc, char *argv[]){
 					}
 
 					//find first probe
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
 					while(input[i] != '\t' && input[i] != ' ') {
-
-						//hashing
-
-						probe = atoi(&input[i]);
+						node_name[k] = input[i];
+						k++;
 						i++;
+						
 						if(check==i){
 							check = read(fd, input, 100);
 							if(check<0){
@@ -300,14 +301,15 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
+
 					if(curr->type == 'D'){
-						curr->pos = probe;
+						curr->pos = add_node(node_name, &hash_head);
 					}
 					else if(curr->type == 'Q'){
-						curr->C = probe;	
+						curr->C = add_node(node_name, &hash_head);	
 					}
 					else{
-						curr->D = probe;	
+						curr->D = add_node(node_name, &hash_head);	
 					}
 
 
@@ -325,12 +327,15 @@ int main(int argc, char *argv[]){
 					}
 
 					//find second probe
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
 					while(input[i] != '\t' && input[i] != ' ') {
-
-						//hashing
-
-						probe = atoi(&input[i]);
+						node_name[k] = input[i];
+						k++;
 						i++;
+						
 						if(check==i){
 							check = read(fd, input, 100);
 							if(check<0){
@@ -341,14 +346,15 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
+
 					if(curr->type == 'D'){
-						curr->neg = probe;
+						curr->neg = add_node(node_name, &hash_head);
 					}
 					else if(curr->type == 'Q'){
-						curr->B = probe;	
+						curr->B = add_node(node_name, &hash_head);	
 					}
 					else{
-						curr->G = probe;	
+						curr->G = add_node(node_name, &hash_head);	
 					}
 
 
@@ -368,12 +374,15 @@ int main(int argc, char *argv[]){
 						}
 
 						//find third probe
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
 						while(input[i] != '\t' && input[i] != ' ') {
-
-							//hashing
-
-							probe = atoi(&input[i]);
+							node_name[k] = input[i];
+							k++;
 							i++;
+							
 							if(check==i){
 								check = read(fd, input, 100);
 								if(check<0){
@@ -384,11 +393,12 @@ int main(int argc, char *argv[]){
 								i = 0;
 							}
 						}
+
 						if(curr->type == 'Q'){
-							curr->E = probe;	
+							curr->E = add_node(node_name, &hash_head);	
 						}
 						else{
-							curr->S = probe;
+							curr->S = add_node(node_name, &hash_head);
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
@@ -403,12 +413,15 @@ int main(int argc, char *argv[]){
 							}
 
 							//find forth probe
+							for(k=0;k<NODE_SIZE;k++){
+								node_name[k]='\0';
+							}
+							k = 0;
 							while(input[i] != '\t' && input[i] != ' ') {
-
-								//hashing
-
-								probe = atoi(&input[i]);
+								node_name[k] = input[i];
+								k++;
 								i++;
+								
 								if(check==i){
 									check = read(fd, input, 100);
 									if(check<0){
@@ -420,7 +433,7 @@ int main(int argc, char *argv[]){
 								}
 							}
 
-							curr->B = probe;
+							curr->B = add_node(node_name, &hash_head);
 						}
 
 					}
