@@ -5,8 +5,8 @@
 
 struct element{
 	char type;
-	int pos;
-	int neg;
+	long int pos;
+	long int neg;
 	double value;
 	int D;
 	int G;
@@ -23,16 +23,16 @@ struct element{
 };
 
 
-void printList(struct element *head){
+void printList(struct element *head, struct node *hash_head){
 	struct element *curr;
 	int i = 1;
 	
 	for(curr = head; curr != NULL; curr = curr->next){
 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
-			printf("%d: type = %c, name = %s, pos = %d, neg = %d, value = %.*lf \n",i, curr->type, curr->name, curr->pos, curr->neg, PREC,curr->value);
+			printf("%d: type = %c, name = %s, pos = %s, neg = %s, value = %.*lf \n",i, curr->type, curr->name, find_value(hash_head,curr->pos), find_value(hash_head,curr->neg), PREC,curr->value);
 		}
 		else if(curr->type == 'D'){
-			printf("%d: type = %c, name = %s, pos = %d, neg = %d, model_name = %s, area = %.*lf \n", i, curr->type, curr->name, curr->pos, curr->neg, curr->model_name, PREC, curr->area);
+			printf("%d: type = %c, name = %s, pos = %ld, neg = %ld, model_name = %s, area = %.*lf \n", i, curr->type, curr->name, curr->pos, curr->neg, curr->model_name, PREC, curr->area);
 		}
 		else if(curr->type == 'M'){
 			printf("%d: type = %c, name = %s, D = %d, G = %d, S = %d, B = %d, model_name = %s, L = %.*lf, W = %.*lf \n", i, curr->type, curr->name, curr->D, curr->G, curr->S, curr->B, curr->model_name, PREC, curr->L, PREC, curr->W);
