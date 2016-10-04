@@ -1,10 +1,12 @@
+* aaaaa aaaaa aaaaaa
 V1 1 0 0
 V2 6 0 3
 R1 2 1 450
 R2 4 3 640
 R3 5 3 10e3
 L1 3 6 1e-6
+* bb bbbbb bbbbb bbbb b
 C1 4 0 2e-12
-* o kostakhs einai theoylhs
+	  * gggg gggg g ggggg
   M1 5	 4 0 0 pmos L=1e-6 W=45e-6 
 Q1 4 2 0 mod1 2.0   
