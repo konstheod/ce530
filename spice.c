@@ -142,12 +142,15 @@ int main(int argc, char *argv[]){
 					}
 
 					//find positive probe
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
 					while(input[i] != '\t' && input[i] != ' ') {
-
-						//hashing
-
-						curr->pos = atoi(&input[i]);
+						node_name[k] = input[i];
+						k++;
 						i++;
+						
 						if(check==i){
 							check = read(fd, input, 100);
 							if(check<0){
@@ -158,6 +161,8 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
+					curr->pos = add_node(node_name, &hash_head);
+					printf("HASH_HEAD %p\n",hash_head);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -173,12 +178,15 @@ int main(int argc, char *argv[]){
 					}
 
 					//find negative probe
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
 					while(input[i] != '\t' && input[i] != ' ') {
-
-						//hashing
-
-						curr->neg = atoi(&input[i]);
+						node_name[k] = input[i];
+						k++;
 						i++;
+						
 						if(check==i){
 							check = read(fd, input, 100);
 							if(check<0){
@@ -189,6 +197,8 @@ int main(int argc, char *argv[]){
 							i = 0;
 						}
 					}
+					curr->neg = add_node(node_name, &hash_head);
+					printf("HASH_HEAD %p\n", hash_head);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -577,7 +587,7 @@ int main(int argc, char *argv[]){
 	printf("%d lines of code.\n",j);
 
 
-	printList(head);
+	printList(head, hash_head);
 
 	close(fd);
 	return(0);
