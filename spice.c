@@ -5,40 +5,13 @@
 #include <string.h>
 #include <stdlib.h> // for malloc free 
 
-#define SIZE_VALUE 20
-#define SIZE_NAME 20
-// int toupper(int c);
-// int tolower(int c);
 
-struct element{
-	char type;
-	int pos;
-	int neg;
-	double value;
-	int D;
-	int G;
-	int S;
-	int B;
-	int C;
-	int E;
-	double L;
-	double W;
-	char model_name[SIZE_NAME];
-	double area;
-	char name[SIZE_NAME];
-
-
-	struct element *next;
-};
-
-
-
+#include "hash_table.h"
+#include "parser.h"
 
 int main(int argc, char *argv[]){
 	int fd, check;
 	char file_name[50];
-	struct element *head, *curr;
-
 
 	//We ask for the file name of the circuit.
 	printf("Give me the exact file name: ");
@@ -60,9 +33,12 @@ int main(int argc, char *argv[]){
 
 	int k, i, j=1, probe;
 	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
+	char node_name[NODE_SIZE];
+	struct element *head, *curr;
+	struct node *hash_head;
+	hash_head = NULL;
+	head = NULL;
 
-	curr = (struct element *) malloc (sizeof(struct element));
-	head = curr;
 	while(1){
 		check = read(fd, input, 100);
 		
@@ -76,7 +52,6 @@ int main(int argc, char *argv[]){
 		while(i<check){
 
 			if(input[i] == '\n'){
-				//printf("\n");
 				j++;
 				i++;
 				continue;
@@ -103,7 +78,22 @@ int main(int argc, char *argv[]){
 			}
 			else{
 				input[i] = toupper(input[i]); // ta kanei ola kefalaia
-				printf("TO Upper %c", input[i]);
+
+				curr = (struct element *) malloc (sizeof(struct element));
+				if(curr == NULL){
+					printf("Error to malloc!\n");
+					return(-1);
+				}
+				
+				if(head != NULL){
+					curr->next = head;
+					head = curr;
+				} 
+				else {
+					head = curr;
+					curr->next = NULL;
+				}
+
 				if(input[i] == 'R' || input[i] == 'C' || input[i] == 'L' || input[i] == 'V' || input[i] == 'I'){
 					curr->type = input[i];
 					i++;
@@ -157,7 +147,6 @@ int main(int argc, char *argv[]){
 						//hashing
 
 						curr->pos = atoi(&input[i]);
-						printf(" %d",curr->pos);
 						i++;
 						if(check==i){
 							check = read(fd, input, 100);
@@ -189,7 +178,6 @@ int main(int argc, char *argv[]){
 						//hashing
 
 						curr->neg = atoi(&input[i]);
-						printf(" %d ",curr->neg);
 						i++;
 						if(check==i){
 							check = read(fd, input, 100);
@@ -233,7 +221,6 @@ int main(int argc, char *argv[]){
 					}
 
 					curr->value = atof(curr_value);
-					printf(" %lf \n",curr->value);
 					continue;
 
 
@@ -292,7 +279,6 @@ int main(int argc, char *argv[]){
 						//hashing
 
 						probe = atoi(&input[i]);
-						printf(" %d",probe);
 						i++;
 						if(check==i){
 							check = read(fd, input, 100);
@@ -334,7 +320,6 @@ int main(int argc, char *argv[]){
 						//hashing
 
 						probe = atoi(&input[i]);
-						printf(" %d",probe);
 						i++;
 						if(check==i){
 							check = read(fd, input, 100);
@@ -378,7 +363,6 @@ int main(int argc, char *argv[]){
 							//hashing
 
 							probe = atoi(&input[i]);
-							printf(" %d",probe);
 							i++;
 							if(check==i){
 								check = read(fd, input, 100);
@@ -414,7 +398,6 @@ int main(int argc, char *argv[]){
 								//hashing
 
 								probe = atoi(&input[i]);
-								printf(" %d",probe);
 								i++;
 								if(check==i){
 									check = read(fd, input, 100);
@@ -463,7 +446,6 @@ int main(int argc, char *argv[]){
 						}
 					}
 
-					printf(" %s", curr->model_name);
 					if(curr->type != 'M'){
 						//find whitespaces before area if exists
 						while(input[i] == '\t' || input[i] == ' '){
@@ -541,7 +523,6 @@ int main(int argc, char *argv[]){
 							k++;
 						}
 						curr->L = atof(curr_value);
-						printf(" %lf", curr->L);
 
 						//find whitespaces before W
 						while(!isdigit(input[i])){
@@ -578,9 +559,7 @@ int main(int argc, char *argv[]){
 							k++;
 						}
 						curr->W = atof(curr_value);
-						printf(" %lf", curr->W);
 					}
-					printf("\n");
 				}
 			}
 
@@ -598,16 +577,7 @@ int main(int argc, char *argv[]){
 	printf("%d lines of code.\n",j);
 
 
-
-	/*
-	blueprint of the read function
-	check = read(fd, &input[i], 1);
-	if(check<0){
-		printf("Problem with read\n");
-		close(fd);
-		return(-1);
-	}*/
-
+	printList(head);
 
 	close(fd);
 	return(0);
