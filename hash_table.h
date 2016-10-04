@@ -50,6 +50,7 @@ long int add_node(char *name, struct node **head){
 		curr->next = *head;
 		*head = curr;
 		(*head)->key = counter;
+		strcpy((*head)->name,name);
 		counter++;
 
 	} 
@@ -62,7 +63,7 @@ long int add_node(char *name, struct node **head){
 		curr->next = NULL;
 		*head = curr;
 		(*head)->key = 0;
-		
+		strcpy((*head)->name,"0");
 		
 		if(strcmp(name,"0")){
 			curr = (struct node *) malloc (sizeof(struct node));
@@ -73,6 +74,7 @@ long int add_node(char *name, struct node **head){
 			curr->next = *head;
 			*head = curr;		
 			(*head)->key = counter;
+			strcpy((*head)->name,name);
 			counter++;
 		}
 		
