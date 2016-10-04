@@ -31,13 +31,13 @@ char* find_value(struct node *head, long int key){
 	return(NULL);
 }
 
-long int add_node(char *name, struct node *head){
+long int add_node(char *name, struct node **head){
 	struct node *curr;
 	int check;
 	
 	
-	if(head != NULL){
-		check = find_node(head, name);
+	if((*head) != NULL){
+		check = find_node(*head, name);
 		//already exists
 		if(check != -1){
 			return (check);
@@ -47,8 +47,9 @@ long int add_node(char *name, struct node *head){
 			printf("Error at malloc (add_node)\n");
 			return (-1);
 		}
-		
-		head->key = counter;
+		curr->next = *head;
+		*head = curr;
+		(*head)->key = counter;
 		counter++;
 
 	} 
@@ -58,9 +59,9 @@ long int add_node(char *name, struct node *head){
 			printf("Error at malloc (add_node)\n");
 			return (-1);
 		}
-		curr->next = head;
-		head = curr;
-		head->key = 0;
+		curr->next = NULL;
+		*head = curr;
+		(*head)->key = 0;
 		
 		
 		if(strcmp(name,"0")){
@@ -69,13 +70,13 @@ long int add_node(char *name, struct node *head){
 				printf("Error at malloc (add_node)\n");
 				return (-1);
 			}
-			curr->next = head;
-			head = curr;		
-			head->key = counter;
+			curr->next = *head;
+			*head = curr;		
+			(*head)->key = counter;
 			counter++;
 		}
 		
 		
 	}
-	return(head->key);
+	return((*head)->key);
 }
