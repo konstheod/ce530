@@ -46,8 +46,8 @@ int main(int argc, char *argv[]){
 	
 	//strcpy(file_name, "circuit1.netlist");
 	//strcpy(file_name, "circuit1_abnormal.netlist");
-	strcpy(file_name, "transistor_circuit.netlist");
-	//strcpy(file_name, "transistor_circuit_abnormal.netlist");
+	//strcpy(file_name, "transistor_circuit.netlist");
+	strcpy(file_name, "transistor_circuit_abnormal.netlist");
 
 	printf("The file that you gave me is \"%s\"\n\n",file_name );
 	
@@ -84,6 +84,16 @@ int main(int argc, char *argv[]){
 			else if(input[i] == '*'){
 				while(i<check && input[i]!='\n'){
 					i++;
+					if(check==i){
+						check = read(fd, input, 100);
+		
+						if(check<0){
+							printf("Problem with read\n");
+							close(fd);
+							return(-1);
+						}
+						i = 0;
+					}
 				}
 				continue;
 			}
