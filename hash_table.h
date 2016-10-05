@@ -82,3 +82,18 @@ long int add_node(char *name, struct node **head){
 	}
 	return((*head)->key);
 }
+
+int free_nodes(struct node **node_hash_head){
+	struct node *hash_head, *next;
+	hash_head = *node_hash_head;
+
+	while(hash_head!=NULL){
+		next = hash_head->next;
+		free(hash_head);
+		hash_head = next;
+	}
+
+
+	*node_hash_head = hash_head;
+	return(1);
+}
