@@ -12,10 +12,17 @@
 int main(int argc, char *argv[]){
 	int fd;
 	char file_name[50];
+	struct node * hash_table[HASH_TABLE_SIZE];
+	
+	int i;
+	
+	for(i = 0; i < HASH_TABLE_SIZE; i++){
+	    
+	    hash_table[i] = NULL;
+	}
 
 	//We ask for the file name of the circuit.
-	printf("Give me the exact file name: ");
-	scanf("%s",file_name );
+	strcpy(file_name, argv[1]);
 	
 	//strcpy(file_name, "circuit1.netlist");
 	//strcpy(file_name, "circuit1_abnormal.netlist");
@@ -32,15 +39,14 @@ int main(int argc, char *argv[]){
 	}
 
 	struct element *head;
-	struct node *hash_head;
-	hash_head = NULL;
 	head = NULL;
 
-	parser(&head, &hash_head, fd);
+	parser(&head, hash_table, fd);
 
-	printList(head, hash_head);
+	//printList(head, hash_head);
+	printList2(head, hash_table);
 	free_elements(&head);
-	free_nodes(&hash_head);
+	free_nodes(hash_table);
 
 	close(fd);
 	return(0);
