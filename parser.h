@@ -22,14 +22,15 @@ struct element{
 	struct element *next;
 };
 
-int parser(struct element **element_head, struct node **node_hash_head, int fd){
+
+struct node * hash_table[HASH_TABLE_SIZE];
+
+int parser(struct element **element_head, int fd){
 	int k, i, j=1, check;;
 	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
 	char node_name[NODE_SIZE];	
 	struct element *head, *curr, *tail;
-	struct node *hash_head;
 	head = *element_head;
-	hash_head = *node_hash_head;
 	tail = NULL;
 	curr = NULL;
 
@@ -163,7 +164,7 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 							i = 0;
 						}
 					}
-					curr->pos = add_node(node_name, &hash_head);
+					curr->pos = add_node(node_name);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -198,7 +199,7 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 							i = 0;
 						}
 					}
-					curr->neg = add_node(node_name, &hash_head);
+					curr->neg = add_node(node_name);
 
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
@@ -305,13 +306,13 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 					}
 
 					if(curr->type == 'D'){
-						curr->pos = add_node(node_name, &hash_head);
+						curr->pos = add_node(node_name);
 					}
 					else if(curr->type == 'Q'){
-						curr->C = add_node(node_name, &hash_head);	
+						curr->C = add_node(node_name);	
 					}
 					else{
-						curr->D = add_node(node_name, &hash_head);	
+						curr->D = add_node(node_name);	
 					}
 
 
@@ -350,13 +351,13 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 					}
 
 					if(curr->type == 'D'){
-						curr->neg = add_node(node_name, &hash_head);
+						curr->neg = add_node(node_name);
 					}
 					else if(curr->type == 'Q'){
-						curr->B = add_node(node_name, &hash_head);	
+						curr->B = add_node(node_name);	
 					}
 					else{
-						curr->G = add_node(node_name, &hash_head);	
+						curr->G = add_node(node_name);	
 					}
 
 
@@ -397,10 +398,10 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 						}
 
 						if(curr->type == 'Q'){
-							curr->E = add_node(node_name, &hash_head);	
+							curr->E = add_node(node_name);	
 						}
 						else{
-							curr->S = add_node(node_name, &hash_head);
+							curr->S = add_node(node_name);
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
@@ -435,7 +436,7 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 								}
 							}
 
-							curr->B = add_node(node_name, &hash_head);
+							curr->B = add_node(node_name);
 						}
 
 					}
@@ -599,7 +600,7 @@ int parser(struct element **element_head, struct node **node_hash_head, int fd){
 		}
 	}
 	printf("I read %d lines of code, included the comments.\n",j);
-	*node_hash_head = hash_head;
+	//*node_hash_head = hash_head;
 	*element_head = head;
 	return(1);
 }
@@ -619,24 +620,46 @@ int free_elements(struct element **element_head){
 	return(1);
 }
 
-void printList(struct element *head, struct node *hash_head){
+void printList(struct element *head){
 	struct element *curr;
 	int i = 1;
 	
 	for(curr = head; curr != NULL; curr = curr->next){
 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
-			printf("%d: %c%s %s %s %.*lf \n",i, curr->type, curr->name, find_value(hash_head,curr->pos), find_value(hash_head,curr->neg), PREC,curr->value);
+			printf("%d: %c%s %s %s %.*lf \n",i, curr->type, curr->name, find_value(curr->pos), find_value(curr->neg), PREC,curr->value);
 		}
 		else if(curr->type == 'D'){
-			printf("%d: %c%s %s %s %s %.*lf \n", i, curr->type, curr->name, find_value(hash_head,curr->pos), find_value(hash_head,curr->neg), curr->model_name, PREC, curr->area);
+			printf("%d: %c%s %s %s %s %.*lf \n", i, curr->type, curr->name, find_value(curr->pos), find_value(curr->neg), curr->model_name, PREC, curr->area);
 		}
 		else if(curr->type == 'M'){
-			printf("%d: %c%s %s %s %s %s %s L = %.*lf W = %.*lf \n", i, curr->type, curr->name, find_value(hash_head,curr->D), find_value(hash_head,curr->G), find_value(hash_head,curr->S), find_value(hash_head,curr->B), curr->model_name, PREC, curr->L, PREC, curr->W);
+			printf("%d: %c%s %s %s %s %s %s L = %.*lf W = %.*lf \n", i, curr->type, curr->name, find_value(curr->D), find_value(curr->G), find_value(curr->S), find_value(curr->B), curr->model_name, PREC, curr->L, PREC, curr->W);
 		}
 		else {
-			printf("%d: %c%s %s %s %s %s %.*lf \n", i, curr->type, curr->name, find_value(hash_head,curr->C), find_value(hash_head,curr->B), find_value(hash_head,curr->E), curr->model_name, PREC, curr->area);
+			printf("%d: %c%s %s %s %s %s %.*lf \n", i, curr->type, curr->name, find_value(curr->C), find_value(curr->B), find_value(curr->E), curr->model_name, PREC, curr->area);
 		}
 		i++;
 	}
 	
 }
+
+// void printList2(struct element *head, struct node *hash_head[]){
+// 	struct element *curr;
+// 	int i = 1;
+	
+// 	for(curr = head; curr != NULL; curr = curr->next){
+// 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
+// 			printf("%d: %c %s %.*lf \n",i, curr->type, curr->name, PREC,curr->value);
+// 		}
+// 		else if(curr->type == 'D'){
+// 			printf("%d: %c %s %s %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->area);
+// 		}
+// 		else if(curr->type == 'M'){
+// 			printf("%d: %c %s %s L = %.*lf W = %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->L, PREC, curr->W);
+// 		}
+// 		else {
+// 			printf("%d: %c %s %s %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->area);
+// 		}
+// 		i++;
+// 	}
+	
+//}

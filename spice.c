@@ -9,10 +9,11 @@
 #include "hash_table.h"
 #include "parser.h"
 
+struct node * hash_table[HASH_TABLE_SIZE];
+
 int main(int argc, char *argv[]){
 	int fd;
 	char file_name[50];
-	struct node * hash_table[HASH_TABLE_SIZE];
 	
 	int i;
 	
@@ -41,10 +42,10 @@ int main(int argc, char *argv[]){
 	struct element *head;
 	head = NULL;
 
-	parser(&head, hash_table, fd);
-
-	//printList(head, hash_head);
-	printList2(head, hash_table);
+	parser(&head, fd);
+	
+	printList(head);
+	
 	free_elements(&head);
 	free_nodes(hash_table);
 
