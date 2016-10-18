@@ -1,0 +1,4 @@
+R3 one two 4
+R1 two 0 2
+I2 0 two 2
+V4 one 0 3

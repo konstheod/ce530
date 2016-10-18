@@ -8,19 +8,26 @@
 
 #include "hash_table.h"
 #include "parser.h"
+#include "MNA_constructor.h"
+
+struct node * hash_table[HASH_TABLE_SIZE];
+
+double **mna;
+double *x, *b;
 
 int main(int argc, char *argv[]){
 	int fd;
 	char file_name[50];
+	
+	int i;	
+	
+	for(i = 0; i < HASH_TABLE_SIZE; i++){
+	    
+	    hash_table[i] = NULL;
+	}
 
 	//We ask for the file name of the circuit.
-	printf("Give me the exact file name: ");
-	scanf("%s",file_name );
-	
-	//strcpy(file_name, "circuit1.netlist");
-	//strcpy(file_name, "circuit1_abnormal.netlist");
-	//strcpy(file_name, "transistor_circuit.netlist");
-	//strcpy(file_name, "transistor_circuit_abnormal.netlist");
+	strcpy(file_name, argv[1]);
 
 	printf("The file that you gave me is \"%s\"\n",file_name );
 	
@@ -32,15 +39,18 @@ int main(int argc, char *argv[]){
 	}
 
 	struct element *head;
-	struct node *hash_head;
-	hash_head = NULL;
 	head = NULL;
 
-	parser(&head, &hash_head, fd);
-
-	printList(head, hash_head);
+	parser(&head, fd);
+	
+	printList(head);
+	constructor(nodes(),m2_elem(), head);
+	print_MNA(nodes(),m2_elem());
+	
+	
+	free_mna(nodes(),m2_elem());
 	free_elements(&head);
-	free_nodes(&hash_head);
+	free_nodes(hash_table);
 
 	close(fd);
 	return(0);
