@@ -25,8 +25,11 @@ struct element{
 
 struct node * hash_table[HASH_TABLE_SIZE];
 
+<<<<<<< HEAD
 int counter_m2 = 0; //counter for elements in team2
 
+=======
+>>>>>>> 8a849c82e8f896df5b48a4210af1c5bc9c2df87b
 int parser(struct element **element_head, int fd){
 	int k, i, j=1, check;;
 	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
@@ -647,6 +650,30 @@ void printList(struct element *head){
 	
 }
 
+<<<<<<< HEAD
 int m2_elem(){
 	return counter_m2;
 }
+=======
+// void printList2(struct element *head, struct node *hash_head[]){
+// 	struct element *curr;
+// 	int i = 1;
+	
+// 	for(curr = head; curr != NULL; curr = curr->next){
+// 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
+// 			printf("%d: %c %s %.*lf \n",i, curr->type, curr->name, PREC,curr->value);
+// 		}
+// 		else if(curr->type == 'D'){
+// 			printf("%d: %c %s %s %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->area);
+// 		}
+// 		else if(curr->type == 'M'){
+// 			printf("%d: %c %s %s L = %.*lf W = %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->L, PREC, curr->W);
+// 		}
+// 		else {
+// 			printf("%d: %c %s %s %.*lf \n", i, curr->type, curr->name, curr->model_name, PREC, curr->area);
+// 		}
+// 		i++;
+// 	}
+	
+//}
+>>>>>>> 8a849c82e8f896df5b48a4210af1c5bc9c2df87b

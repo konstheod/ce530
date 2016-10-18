@@ -19,6 +19,7 @@ unsigned int hash(char *name){
    for(i = 0; name[i] != '\0'; i++){
 	hash_code = (hash_code << 5) + hash_code + name[i];
    }
+   printf("%d %d\n",hash_code, (hash_code%HASH_TABLE_SIZE) );
    return (hash_code%HASH_TABLE_SIZE);
     
 }
@@ -42,7 +43,6 @@ long int find_node(char *name){
 char* find_value( long int key){
 	if(key == 0){
 		return ("0");
-<<<<<<< HEAD
 	}
 	return(hash_table[key%HASH_TABLE_SIZE]->name);
 }
@@ -51,10 +51,6 @@ unsigned long int find_index( long int key){
 		return (0);
 	}
 	return(hash_table[key%HASH_TABLE_SIZE]->index);
-=======
-	}
-	return(hash_table[key%HASH_TABLE_SIZE]->name);
->>>>>>> 8a849c82e8f896df5b48a4210af1c5bc9c2df87b
 }
 
 long int add_node(char *name){
@@ -63,7 +59,6 @@ long int add_node(char *name){
 	int check;
 
 	if(!strcmp(name, "0")) {
-<<<<<<< HEAD
 	    return 0;
 	}
 	check = find_node(name);
@@ -76,31 +71,13 @@ long int add_node(char *name){
 	curr->key = hashIndex;
 	curr->index = counter;
 
-=======
-        
-	    return 0;
-	}
-	hashIndex = hash(name);
-	curr = (struct node *) malloc (sizeof(struct node));
-	strcpy(curr->name,name);
-	curr->key = hashIndex;
-
-	check = find_node(name);
-	if(check!= (-1)){
-		return(check);
-	}
->>>>>>> 8a849c82e8f896df5b48a4210af1c5bc9c2df87b
 	while(hash_table[hashIndex] != NULL){
       ++hashIndex;
 		
       hashIndex %= HASH_TABLE_SIZE;
    }
-<<<<<<< HEAD
 
    	counter++;
-=======
-   
->>>>>>> 8a849c82e8f896df5b48a4210af1c5bc9c2df87b
    	hash_table[hashIndex] = curr;      
 	return(curr->key);
 }
