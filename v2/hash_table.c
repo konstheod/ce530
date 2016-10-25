@@ -1,17 +1,8 @@
-#include <stdlib.h> 
-#define NODE_SIZE 40
-#define HASH_TABLE_SIZE 2000
-
-struct node{
-	char name[NODE_SIZE];
-	unsigned long int index;
-	unsigned long int key;
-	struct node *next;
-};
+#include "spice.h"
 
 long int counter = 1;
 
-extern struct node * hash_table[HASH_TABLE_SIZE];
+struct node * hash_table[HASH_TABLE_SIZE];
 
 unsigned int hash(char *name){
    unsigned int hash_code = 5381;

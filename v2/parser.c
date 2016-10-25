@@ -1,26 +1,4 @@
-#define SIZE_VALUE 20
-#define SIZE_NAME 20
-#define NODE_SIZE 40
-#define PREC 15
-
-struct element{
-	char type;
-	long int pos;
-	long int neg;
-	double value;
-	long int D;
-	long int G;
-	long int S;
-	long int B;
-	long int C;
-	long int E;
-	double L;
-	double W;
-	char model_name[SIZE_NAME];
-	double area;
-	char name[SIZE_NAME];
-	struct element *next;
-};
+#include "spice.h"
 
 
 struct node * hash_table[HASH_TABLE_SIZE];

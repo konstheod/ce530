@@ -1,5 +1,8 @@
-extern double *mna;
-extern double *b;
+#include "spice.h"
+
+
+double *mna;
+double *b;
 
 int vol_counter = 0;
 

@@ -1,14 +1,4 @@
-#include <stdio.h>
-#include <fcntl.h> // for open read write
-#include <unistd.h>
-#include <ctype.h> //for toupper, tolower, isspace
-#include <string.h>
-#include <stdlib.h> // for malloc free 
-
-
-#include "hash_table.h"
-#include "parser.h"
-#include "MNA_constructor.h"
+#include "spice.h"
 
 struct node * hash_table[HASH_TABLE_SIZE];
 
