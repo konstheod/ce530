@@ -1,26 +1,18 @@
 #include "spice.h"
 
 
-double *mna;
-double *b;
+gsl_matrix *mna;
+gsl_vector *b;
 
 int vol_counter = 0;
 
 void MNA_init(int node_sum, int m2_elem){
 
-	//calloc ston pinaka mna
-	mna = (double*) calloc((node_sum+m2_elem-1)*(node_sum+m2_elem-1),sizeof(double));
-	if(mna == NULL){
-		printf("Error to malloc!\n");
-		exit(-1);
-	}
+	//calloc ston pinaka mna	
+    mna = gsl_matrix_calloc ((node_sum+m2_elem-1), (node_sum+m2_elem-1));
 
-	//calloc sto dianusma b
-	b = (double*) calloc((node_sum+m2_elem-1),sizeof(double));
-	if(b == NULL){
-		printf("Error to malloc!\n");
-		exit(-1);
-	}
+    //calloc sto dianusma b
+    b = gsl_vector_calloc (node_sum+m2_elem-1);
 
 }
 
@@ -38,20 +30,20 @@ int MNA_conductance(struct element *cont, int node_sum, int m2_elem){
     
     //an kapoios komvos einai geiwsh tote vazoume t value mono sto diagwnio
     if(pos == 0){
-	mna[(neg-1)*(node_sum+m2_elem-1) + neg - 1] += value;
-	return(1);
+        gsl_matrix_set (mna, (neg-1), (neg-1), gsl_matrix_get(mna, (neg-1), (neg-1)) + value);
+    	return(1);
     }
     if(neg == 0){
-	mna[(pos-1)*(node_sum+m2_elem-1) + pos-1] += value;
-	return(1);
+        gsl_matrix_set (mna, (pos-1), (pos-1), gsl_matrix_get(mna, (pos-1), (pos-1)) + value);
+    	return(1);
     }
     
     //anathesh timwn ston pinaka otan kanenas komvos den einai geiwsh
-    mna[(pos-1)*(node_sum+m2_elem-1) + pos-1] += value;
-    mna[(neg-1)*(node_sum+m2_elem-1) + neg - 1] += value;
+    gsl_matrix_set (mna, (neg-1), (neg-1), gsl_matrix_get(mna, (neg-1), (neg-1)) + value);
+    gsl_matrix_set (mna, (pos-1), (pos-1), gsl_matrix_get(mna, (pos-1), (pos-1)) + value);
 
-    mna[(neg-1)*(node_sum+m2_elem-1) + pos-1] -= value;
-    mna[(pos-1)*(node_sum+m2_elem-1) + neg-1] -= value;
+    gsl_matrix_set (mna, (pos-1), (neg-1), gsl_matrix_get(mna, (pos-1), (neg-1)) - value);
+    gsl_matrix_set (mna, (neg-1), (pos-1), gsl_matrix_get(mna, (neg-1), (pos-1)) - value);
     
     return(0);
 }
@@ -66,16 +58,16 @@ int MNA_power(struct element *power){
     neg = find_index(power->neg); 
     
     if(pos == 0){
-	b[neg-1] += value;
-	return 1;
+        gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
+    	return 1;
     }
     if(neg == 0){
-	b[pos-1] -= value;
-	return 1;
+    	gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
+    	return 1;
     }
    
-    b[neg-1] += value;
-    b[pos-1] -= value;
+    gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
+    gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
     return 0;
 
 }
@@ -92,20 +84,20 @@ int MNA_voltage(struct element *vol, int node_sum, int m2_elem){
     neg = find_index(vol->neg); 
     
     if(vol->type == 'L'){
-	value = 0;
+	   value = 0;
     }
     
-    b[node_sum - 1 + vol_counter] = value;
+    gsl_vector_set(b,(node_sum - 1 + vol_counter),value);
     
     
     //prosthiki sto mna
     if(pos != 0){
-	mna[(pos-1)*(node_sum+m2_elem-1) + node_sum + vol_counter -1] += 1;
-	mna[(node_sum + vol_counter - 1)*(node_sum+m2_elem-1) + pos - 1] += 1;
+        gsl_matrix_set (mna, (node_sum + vol_counter -1), (pos-1), gsl_matrix_get(mna, (node_sum + vol_counter -1), (pos-1)) + 1);
+        gsl_matrix_set (mna, (pos-1), (node_sum + vol_counter -1), gsl_matrix_get(mna, (pos-1), (node_sum + vol_counter -1 )) + 1);
     }
     if(neg != 0){
-	mna[(neg-1)*(node_sum+m2_elem-1) + node_sum + vol_counter -1] -= 1;
-	mna[(node_sum + vol_counter - 1)*(node_sum+m2_elem-1) + neg - 1] -= 1;
+        gsl_matrix_set (mna, (node_sum + vol_counter -1), (neg-1), gsl_matrix_get(mna, (node_sum + vol_counter -1), (neg-1)) - 1);
+        gsl_matrix_set (mna, (neg-1), (node_sum + vol_counter -1), gsl_matrix_get(mna, (neg-1), (node_sum + vol_counter -1)) - 1);
     }
     
     vol_counter++; 
@@ -114,26 +106,24 @@ int MNA_voltage(struct element *vol, int node_sum, int m2_elem){
 
 void free_mna(){
 
-    free(b);
-    free(mna);
+    gsl_vector_free(b);
+    gsl_matrix_free(mna);
 }
 
 void print_MNA(int node_sum, int m2_elem){
-    int i;
+    int i,j;
     
     printf("----MNA----\n");
-    for(i=0; i<(node_sum+m2_elem-1)*(node_sum+m2_elem-1); i++){
-	//for(j=0; j<(node_sum+m2_elem-1); j++){
-	if((i%(node_sum+m2_elem-1) == 0) && i!=0){
-	    printf("\n");
-	}
-	printf("%lf  ",mna[i]);
-	//}
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            printf("%g  ",gsl_matrix_get(mna,i,j));
+        }
+        printf("\n");
     }
     printf("\n----b----\n");
     for(i=0; i<(node_sum+m2_elem-1); i++){
     
-	printf("%lf \n",b[i]);
+	   printf("%g \n",gsl_vector_get(b,i));
 	
     }
     
@@ -142,17 +132,17 @@ void print_MNA(int node_sum, int m2_elem){
 void constructor(int node_sum, int m2_elem, struct element *head){
 	MNA_init(node_sum, m2_elem);
 	struct element *curr;
-	
+	printf("54\n");
 	for(curr = head; curr != NULL; curr = curr->next){
-	    if(curr->type == 'R'){
-		MNA_conductance(curr, node_sum, m2_elem);
-	    }
-	    else if(curr->type == 'I') {
-		MNA_power(curr);
-	    }
-	    else if(curr->type == 'V' || curr->type == 'L') {
-		MNA_voltage(curr, node_sum, m2_elem);
-	    }
+        if(curr->type == 'R'){
+            MNA_conductance(curr, node_sum, m2_elem);
+        }
+        else if(curr->type == 'I') {
+            MNA_power(curr);
+        }
+        else if(curr->type == 'V' || curr->type == 'L') {
+            MNA_voltage(curr, node_sum, m2_elem);
+        }
 	}
 	
 	

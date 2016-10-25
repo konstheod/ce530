@@ -8,6 +8,8 @@
 #include <ctype.h> //for toupper, tolower, isspace
 #include <string.h>
 #include <stdlib.h> // for malloc free 
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_vector.h>
 
 
 
@@ -48,8 +50,8 @@ struct element{
 };
 
 extern struct node * hash_table[HASH_TABLE_SIZE];
-extern double *mna;
-extern double *b;
+extern gsl_matrix *mna;
+extern gsl_vector *b;
 
 
 unsigned int hash(char *name);

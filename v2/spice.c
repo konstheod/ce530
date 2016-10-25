@@ -2,21 +2,24 @@
 
 struct node * hash_table[HASH_TABLE_SIZE];
 
-double *mna;
-double *x, *b;
+gsl_matrix *mna;
+gsl_vector *b;
 
 int main(int argc, char *argv[]){
 	int fd;
 	char file_name[50];
 	
 	int i;	
-	
 	for(i = 0; i < HASH_TABLE_SIZE; i++){
 	    
 	    hash_table[i] = NULL;
 	}
 
 	//We ask for the file name of the circuit.
+	if(argv[1] == NULL){
+		printf("Give me the exact file name: ");
+		scanf("%s",file_name );
+	}
 	strcpy(file_name, argv[1]);
 
 	printf("The file that you gave me is \"%s\"\n",file_name );
