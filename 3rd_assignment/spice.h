@@ -54,13 +54,17 @@ struct element{
 	double end_value;
 	double increment;
 	int dc;
+	int b_position;
 };
 
 extern struct node * hash_table[HASH_TABLE_SIZE];
 extern gsl_matrix *mna;
 extern gsl_vector *b;
+extern gsl_vector *x_help;
+extern gsl_vector *x;
 
 int if_cholesky;
+unsigned long int *if_print;
 
 
 unsigned int hash(char *name);
@@ -75,6 +79,7 @@ void MNA_init(int node_sum, int m2_elem);
 int MNA_conductance(struct element *cont, int node_sum, int m2_elem);
 int MNA_power(struct element *power);
 int MNA_voltage(struct element *vol, int node_sum, int m2_elem);
+int MNA_voltage_dc(struct element *vol,double value, int node_sum);
 void free_mna(void);
 void print_MNA(int node_sum, int m2_elem);
 void constructor(int node_sum, int m2_elem, struct element *head);
@@ -87,5 +92,6 @@ int m2_elem(void);
 int LU_analysis(int node,int m2_elem);
 int Cholesky_analysis(int node_sum,int m2_elem);
 
+int plot(struct element *head);
 
 #endif

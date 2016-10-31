@@ -4,6 +4,10 @@
 struct node * hash_table[HASH_TABLE_SIZE];
 
 int counter_m2 = 0; //counter for elements in team2
+int index_print = 0; //counts element for plot
+
+gsl_vector *x;
+gsl_vector *x_help;
 
 int parser(struct element **element_head, int fd){
 	int k, i, j=1, check;
@@ -248,9 +252,9 @@ int parser(struct element **element_head, int fd){
 						}
 						i = 0;
 					}
-					int str_size = 3;
+					int str_size = 4;
 					if(input[i] == 'L'){
-						str_size = 2;
+						str_size = 3;
 					}
 					for(k = 0; k<str_size; k++){
 						i++;
@@ -265,7 +269,85 @@ int parser(struct element **element_head, int fd){
 							i = 0;
 						}
 					}
-					printf("Vrhka .PRINT PLOT !!!!!!!!!!!!!\n");
+					while(input[i]!='\n'){
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						if(input[i] == 'V'){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+							if(input[i] == '('){
+								i++;
+								if(check==i){
+									check = read(fd, input, 100);
+									if(check<0){
+										printf("Problem with read\n");
+										close(fd);
+										return(-1);
+									}
+									i = 0;
+								}
+								for(k=0;k<NODE_SIZE;k++){
+									node_name[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ' && input[i]!=')') {
+									node_name[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 100);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+								//malloc kai tha vazoume ston if_print to hash	
+								if(index_print == 0){
+									if_print = (unsigned long int *) malloc(sizeof(unsigned long int));
+								} 
+								else {
+									if_print = (unsigned long int *) realloc(if_print,sizeof(unsigned long int));
+								}
+								if_print[index_print] = find_node(node_name);
+								index_print++;
+								
+								while(input[i] == '\t' || input[i] == ' ' || input[i]==')'){
+									i++;
+									if(check==i){
+										check = read(fd, input, 100);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+							}
+						}
+					}
 					
 				}
 				else if(input[i] == 'O'){
@@ -865,7 +947,6 @@ int parser(struct element **element_head, int fd){
 		}
 	}
 	printf("I read %d lines of code, included the comments.\n",j);
-	//*node_hash_head = hash_head;
 	*element_head = head;
 	return(1);
 }
@@ -881,7 +962,7 @@ int free_elements(struct element **element_head){
 	}
 	
 	*element_head = head;
-
+	free(if_print);
 	return(1);
 }
 
@@ -892,7 +973,7 @@ void printList(struct element *head){
 	for(curr = head; curr != NULL; curr = curr->next){
 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
 
-			printf("%d: %c%s %s %s %.*lf \n",i, curr->type, curr->name, find_value(curr->pos), find_value(curr->neg), PREC,curr->value);
+			printf("%d: %c%s %lu %lu %.*lf \n",i, curr->type, curr->name, find_index(curr->pos), find_index(curr->neg), PREC,curr->value);
 			
 		}
 		else if(curr->type == 'D'){
@@ -919,4 +1000,98 @@ void printList(struct element *head){
 
 int m2_elem(){
 	return counter_m2;
+}
+
+int plot(struct element *head){
+	int i, k;
+	double j, x_get;
+	struct element *curr;
+	int check;
+	char file_name[33];
+	char def_file_name[9];
+	int fd;
+	char curr_write[20];
+	int new_file;
+
+	strcpy(def_file_name,"node_name");
+	strcpy(file_name,def_file_name);
+
+
+
+	for(i = 0; i < index_print; i++){
+		new_file = 0;
+		for(curr = head; curr!=NULL; curr = curr->next){
+			if(curr->dc == 0){
+				continue;
+			}
+			for(k = 9; k < 33; k++){
+				file_name[k] = '\0';
+			}
+
+			strcat(file_name,find_value(if_print[i]));
+			strcat(file_name,".txt");
+			while(1){
+				fd = open(file_name, O_RDONLY, 0777);
+				if(fd>0){
+					new_file++;
+					for(k = strlen(find_value(if_print[i])) + 9; k < strlen(file_name); k++){
+						file_name[k] = '\0';
+					}
+					sprintf(curr_write,"%d", new_file);
+					strcat(file_name,"(");
+					strcat(file_name,curr_write);
+					strcat(file_name,").txt");
+				}
+				else{
+					fd = open(file_name, O_CREAT | O_WRONLY, 0777);
+					break;
+				}
+			}
+
+			for(j = curr->start_value; j<curr->end_value; j += curr->increment){
+				MNA_voltage_dc(curr, j, nodes());
+				if(if_cholesky == 0){
+					LU_analysis(nodes(),m2_elem());
+				} else {
+					check = Cholesky_analysis(nodes(),m2_elem());
+					if(check == -1){
+						return -1;
+					}
+				}
+				for(k=0; k<(nodes()-1); k++){
+					if(gsl_vector_get(x_help,k) == find_index(if_print[i])){
+
+						sprintf(curr_write,"%lf", j);
+						check = write(fd, curr_write, strlen(curr_write));
+						if(check<0){
+							perror("write");
+						}
+						for(check = 0; check < 20; check++){
+							curr_write[check] = '\0';
+						}
+						check = write(fd, "\t" , strlen(" "));
+						if(check<0){
+							perror("write");
+						}
+						x_get = gsl_vector_get(x,k);
+						sprintf(curr_write,"%lf", x_get);
+						check = write(fd, curr_write , strlen(curr_write));
+						if(check<0){
+							perror("write");
+						}
+						for(check = 0; check < 20; check++){
+							curr_write[check] = '\0';
+						}
+						check = write(fd, "\n", strlen("\n"));
+						if(check<0){
+							perror("write");
+						}
+					}
+				}
+
+			}
+			close(fd);
+		}
+	}
+	return 0;
 }

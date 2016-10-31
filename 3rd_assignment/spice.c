@@ -4,6 +4,7 @@ struct node * hash_table[HASH_TABLE_SIZE];
 
 gsl_matrix *mna;
 gsl_vector *b;
+gsl_vector *x;
 
 int main(int argc, char *argv[]){
 	int fd;
@@ -38,15 +39,19 @@ int main(int argc, char *argv[]){
 
 	parser(&head, fd);
 	
-	printList(head);
+	// printList(head);
 	constructor(nodes(),m2_elem(), head);
-	print_MNA(nodes(),m2_elem());
+	// print_MNA(nodes(),m2_elem());
 	if(if_cholesky == 0){
-		LU_analysis(nodes(),m2_elem());
+	 	LU_analysis(nodes(),m2_elem());
 	} else {
 		Cholesky_analysis(nodes(),m2_elem());
 	}
+ 	printf ("x = \n");
+	gsl_vector_fprintf (stdout, x, "%g");
 	
+	plot(head);
+
 	free_mna();
 	free_elements(&head);
 	free_nodes(hash_table);
