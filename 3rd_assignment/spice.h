@@ -60,6 +60,8 @@ extern struct node * hash_table[HASH_TABLE_SIZE];
 extern gsl_matrix *mna;
 extern gsl_vector *b;
 
+int if_cholesky;
+
 
 unsigned int hash(char *name);
 long int find_node(char *name);

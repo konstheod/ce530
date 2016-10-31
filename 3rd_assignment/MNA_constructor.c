@@ -176,21 +176,55 @@ int LU_analysis(int node_sum,int m2_elem){
 
 int Cholesky_analysis(int node_sum,int m2_elem){
     // int s;
-    int check = 1,s;
-    printf("aaaaaaaaaaa%d\n", check );
+
+
+    printf("CHOLESKY\n\n");
+    int check = 1, s, i , j;
+    double element;
     gsl_vector *x = gsl_vector_alloc ((node_sum+m2_elem-1));
+
+    double check_cholesky;
+
+    gsl_matrix *l = gsl_matrix_alloc ((node_sum+m2_elem-1), (node_sum+m2_elem-1));
     gsl_permutation * p = gsl_permutation_alloc ((node_sum+m2_elem-1));
-    printf("aaaaaaaaaaa%d\n", check );
-    gsl_linalg_LU_decomp (mna, p, &s);
-    printf("aaaaaaaaaaa%d\n", check );
-    check = gsl_linalg_cholesky_decomp(mna);
-    printf("aaaaaaaaaaa%d\n", check );
-    if(check != GSL_SUCCESS){
-        printf("aaaaaaaaaaa%d\n", check );
+
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
+        }
     }
-    printf("aaaaaaaaaaa%d\n", check );
+
+    gsl_linalg_LU_decomp (l, p, &s);
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            if(i == j){
+                gsl_matrix_set(l,i,j,1);
+            }
+            else if(i<j){
+                gsl_matrix_set(l,i,j,0);
+            }
+        }
+    }
+
+           
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        check_cholesky = 0;
+        for(j=0; j<(i-1); j++){
+            check_cholesky += gsl_matrix_get(l,i,j) * gsl_matrix_get(l,i,j);
+        }
+        element = gsl_matrix_get(mna,i,i);
+        if(element < check_cholesky){
+            printf("ERROR: matrix is not SPD, %d\n", i);
+            return -1;
+        }
+    }
+
+
+    check = gsl_linalg_cholesky_decomp(mna);
+    if(check != GSL_SUCCESS){   
+        printf("%d\n", check );
+    }
     gsl_linalg_cholesky_solve (mna, b, x);
-    printf("aaaaaaaaaaa%d\n", check );
     printf ("x = \n");
     gsl_vector_fprintf (stdout, x, "%g");
 

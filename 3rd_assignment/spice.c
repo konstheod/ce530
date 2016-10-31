@@ -41,7 +41,7 @@ int main(int argc, char *argv[]){
 	printList(head);
 	constructor(nodes(),m2_elem(), head);
 	print_MNA(nodes(),m2_elem());
-	if(strcmp(argv[2],"1")==0){
+	if(if_cholesky == 0){
 		LU_analysis(nodes(),m2_elem());
 	} else {
 		Cholesky_analysis(nodes(),m2_elem());

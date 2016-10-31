@@ -15,6 +15,8 @@ int parser(struct element **element_head, int fd){
 	tail = NULL;
 	curr = NULL;
 
+	if_cholesky = 0;
+
 	while(1){
 		check = read(fd, input, 100);
 		
@@ -265,6 +267,62 @@ int parser(struct element **element_head, int fd){
 					}
 					printf("Vrhka .PRINT PLOT !!!!!!!!!!!!!\n");
 					
+				}
+				else if(input[i] == 'O'){
+					for(k = 0; k<7; k++){
+						i++;
+						if(check==i){
+							check = read(fd, input, 100);
+			
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
+					}
+					while(input[i] == '\t' || input[i] == ' '){
+						i++;
+						if(check==i){
+							check = read(fd, input, 100);
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
+					}
+					if(input[i] == 'S'){
+						i++;
+						if(check==i){
+							check = read(fd, input, 100);
+			
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
+						if(input[i] == 'P'){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+				
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+							if(input[i] == 'D'){
+								if_cholesky = 1;
+							}
+						}
+					}
 				}
 				else {
 					i = i-2;
