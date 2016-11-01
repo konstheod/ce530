@@ -1017,19 +1017,24 @@ int plot(struct element *head){
 	strcpy(file_name,def_file_name);
 
 
-
+	//loop for all the print elements
 	for(i = 0; i < index_print; i++){
 		new_file = 0;
+		//loop for all elements of the list
 		for(curr = head; curr!=NULL; curr = curr->next){
+			//check if an element has DC
 			if(curr->dc == 0){
 				continue;
 			}
+			//initialization of file_name
 			for(k = 9; k < 33; k++){
 				file_name[k] = '\0';
 			}
 
+			//construct the correct file name
 			strcat(file_name,find_value(if_print[i]));
 			strcat(file_name,".txt");
+			//if the file exists change the name
 			while(1){
 				fd = open(file_name, O_RDONLY, 0777);
 				if(fd>0){
@@ -1048,8 +1053,12 @@ int plot(struct element *head){
 				}
 			}
 
+			//make new b for each value of dc voltage source and print the result to file
 			for(j = curr->start_value; j<curr->end_value; j += curr->increment){
+				//construct b
 				MNA_voltage_dc(curr, j, nodes());
+
+				//solve the system Ax = b
 				if(if_cholesky == 0){
 					LU_analysis(nodes(),m2_elem());
 				} else {
@@ -1058,9 +1067,12 @@ int plot(struct element *head){
 						return -1;
 					}
 				}
+
+				//find the node you want to print
 				for(k=0; k<(nodes()-1); k++){
 					if(gsl_vector_get(x_help,k) == find_index(if_print[i])){
 
+						//write the results to file
 						sprintf(curr_write,"%lf", j);
 						check = write(fd, curr_write, strlen(curr_write));
 						if(check<0){

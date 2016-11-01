@@ -132,7 +132,7 @@ int MNA_voltage_dc(struct element *vol,double value, int node_sum){
 
 void free_mna(){
 
-
+    gsl_vector_free (x_help);
     gsl_vector_free (x);
     gsl_vector_free(b);
     gsl_matrix_free(mna);

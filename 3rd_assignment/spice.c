@@ -37,9 +37,11 @@ int main(int argc, char *argv[]){
 	struct element *head;
 	head = NULL;
 
+	//parsing the elements
 	parser(&head, fd);
 	
 	// printList(head);
+	//make mna
 	constructor(nodes(),m2_elem(), head);
 	// print_MNA(nodes(),m2_elem());
 	if(if_cholesky == 0){
@@ -47,15 +49,20 @@ int main(int argc, char *argv[]){
 	} else {
 		Cholesky_analysis(nodes(),m2_elem());
 	}
+
+	//print x
  	printf ("x = \n");
 	gsl_vector_fprintf (stdout, x, "%g");
 	
+	//handles PRINT|PLOT if exist in netlist
 	plot(head);
 
+	//free the structurs
 	free_mna();
 	free_elements(&head);
 	free_nodes(hash_table);
 
+	//close file
 	close(fd);
 	return(0);
 }
