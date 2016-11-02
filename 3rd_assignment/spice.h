@@ -91,6 +91,8 @@ int MNA_power(struct element *power);
 int MNA_voltage(struct element *vol, int node_sum, int m2_elem);
 /*adds voltage sources with dc specs elements to mna*/
 int MNA_voltage_dc(struct element *vol,double value, int node_sum);
+/*adds power sources with dc specs elements to mna*/
+int MNA_power_dc(struct element *power, double value, double old_value);
 /*free mna,b,x,x_help tables*/
 void free_mna(void);
 /*prints MNA matrix and b vector*/
@@ -114,5 +116,8 @@ int Cholesky_analysis(int node_sum,int m2_elem);
 
 /*prints to file the result of print*/
 int plot(struct element *head);
+
+/*prints the value of x without DC*/
+void print_x(void);
 
 #endif

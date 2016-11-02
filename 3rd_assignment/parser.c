@@ -60,6 +60,7 @@ int parser(struct element **element_head, int fd){
 			}
 			else if(input[i] == '.'){
 				i++;
+
 				if(check==i){
 					check = read(fd, input, 100);
 	
@@ -235,12 +236,10 @@ int parser(struct element **element_head, int fd){
 							continue;
 						}
 					}
-					
-
-
 				}
 				else if(input[i] == 'P'){
 					//plot 'h print
+
 					i++;
 					if(check==i){
 						check = read(fd, input, 100);
@@ -269,7 +268,7 @@ int parser(struct element **element_head, int fd){
 							i = 0;
 						}
 					}
-					while(input[i]!='\n'){
+					while(input[i]!='\n' && input[i]!= EOF){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
@@ -328,7 +327,7 @@ int parser(struct element **element_head, int fd){
 									if_print = (unsigned long int *) malloc(sizeof(unsigned long int));
 								} 
 								else {
-									if_print = (unsigned long int *) realloc(if_print,sizeof(unsigned long int));
+									if_print = (unsigned long int *) realloc(if_print,sizeof(unsigned long int) * (index_print + 1));
 								}
 								if_print[index_print] = find_node(node_name);
 								index_print++;
@@ -342,13 +341,15 @@ int parser(struct element **element_head, int fd){
 											close(fd);
 											return(-1);
 										}
+										else if(check == 0){
+											goto exit;
+										}
 										i = 0;
 									}
 								}
 							}
 						}
 					}
-					
 				}
 				else if(input[i] == 'O'){
 					for(k = 0; k<7; k++){
@@ -406,10 +407,6 @@ int parser(struct element **element_head, int fd){
 						}
 					}
 				}
-				else {
-					i = i-2;
-				}
-			
 			}
 			else{
 				input[i] = toupper(input[i]); // ta kanei ola kefalaia
@@ -614,7 +611,6 @@ int parser(struct element **element_head, int fd){
 							i = 0;
 						}
 					}
-
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
@@ -939,14 +935,12 @@ int parser(struct element **element_head, int fd){
 
 			i++;
 		}
-
-
 		//End of file reached
 		if(check < 100 ){
 			break;
 		}
 	}
-	printf("I read %d lines of code, included the comments.\n",j);
+exit:	
 	*element_head = head;
 	return(1);
 }
@@ -1012,6 +1006,8 @@ int plot(struct element *head){
 	int fd;
 	char curr_write[20];
 	int new_file;
+	int lim;
+	int t;
 
 	strcpy(def_file_name,"node_name");
 	strcpy(file_name,def_file_name);
@@ -1033,6 +1029,10 @@ int plot(struct element *head){
 
 			//construct the correct file name
 			strcat(file_name,find_value(if_print[i]));
+			strcat(file_name,"_");
+			sprintf(curr_write,"%c", curr->type);
+			strcat(file_name,curr_write);
+			strcat(file_name,curr->name);
 			strcat(file_name,".txt");
 			//if the file exists change the name
 			while(1){
@@ -1042,21 +1042,42 @@ int plot(struct element *head){
 					for(k = strlen(find_value(if_print[i])) + 9; k < strlen(file_name); k++){
 						file_name[k] = '\0';
 					}
-					sprintf(curr_write,"%d", new_file);
+					strcat(file_name,"_");
+					sprintf(curr_write,"%c", curr->type);
+					strcat(file_name,curr_write);
+					strcat(file_name,curr->name);
 					strcat(file_name,"(");
+					sprintf(curr_write,"%d", new_file);
 					strcat(file_name,curr_write);
 					strcat(file_name,").txt");
+					close(fd);
 				}
-				else{
+				else if(fd<0){
 					fd = open(file_name, O_CREAT | O_WRONLY, 0777);
+					if(fd < 0){
+						perror("open");
+						return -1;
+					}
 					break;
 				}
 			}
-
+			lim = (curr->end_value-curr->start_value) / curr->increment;
+			t = 0;
+			j = curr->start_value;
 			//make new b for each value of dc voltage source and print the result to file
-			for(j = curr->start_value; j<curr->end_value; j += curr->increment){
+			while(t < lim + 1){
 				//construct b
-				MNA_voltage_dc(curr, j, nodes());
+				if(curr->type == 'V'){
+					MNA_voltage_dc(curr, j, nodes());
+				}
+				else if(curr->type == 'I'){
+					if(j>curr->start_value){
+						MNA_power_dc(curr, j, j-curr->increment);
+					}
+					else{
+						MNA_power_dc(curr, j, curr->value);
+					}
+				}
 
 				//solve the system Ax = b
 				if(if_cholesky == 0){
@@ -1070,13 +1091,14 @@ int plot(struct element *head){
 
 				//find the node you want to print
 				for(k=0; k<(nodes()-1); k++){
-					if(gsl_vector_get(x_help,k) == find_index(if_print[i])){
+					if(gsl_vector_get(x_help,k) == if_print[i]){
 
 						//write the results to file
 						sprintf(curr_write,"%lf", j);
 						check = write(fd, curr_write, strlen(curr_write));
 						if(check<0){
 							perror("write");
+							return -1;
 						}
 						for(check = 0; check < 20; check++){
 							curr_write[check] = '\0';
@@ -1084,12 +1106,14 @@ int plot(struct element *head){
 						check = write(fd, "\t" , strlen(" "));
 						if(check<0){
 							perror("write");
+							return -1;
 						}
 						x_get = gsl_vector_get(x,k);
 						sprintf(curr_write,"%lf", x_get);
 						check = write(fd, curr_write , strlen(curr_write));
 						if(check<0){
 							perror("write");
+							return -1;
 						}
 						for(check = 0; check < 20; check++){
 							curr_write[check] = '\0';
@@ -1097,10 +1121,18 @@ int plot(struct element *head){
 						check = write(fd, "\n", strlen("\n"));
 						if(check<0){
 							perror("write");
+							return -1;
 						}
 					}
 				}
-
+				t++;
+				j += curr->increment;
+			}
+			if(curr->type == 'V'){
+				MNA_voltage_dc(curr, curr->value, nodes());
+			}
+			else if(curr->type == 'I'){
+				MNA_power_dc(curr, curr->value, curr->end_value);
 			}
 			close(fd);
 		}

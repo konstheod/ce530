@@ -18,6 +18,8 @@ void MNA_init(int node_sum, int m2_elem){
 
     x_help = gsl_vector_calloc (node_sum+m2_elem-1);
 
+    x = gsl_vector_alloc ((node_sum+m2_elem-1));
+
 
 }
 
@@ -36,12 +38,12 @@ int MNA_conductance(struct element *cont, int node_sum, int m2_elem){
     //an kapoios komvos einai geiwsh tote vazoume t value mono sto diagwnio
     if(pos == 0){
         gsl_matrix_set (mna, (neg-1), (neg-1), gsl_matrix_get(mna, (neg-1), (neg-1)) + value);
-        gsl_vector_set(x_help,(neg-1),neg);
+        gsl_vector_set(x_help,(neg-1),cont->neg);
     	return(1);
     }
     if(neg == 0){
         gsl_matrix_set (mna, (pos-1), (pos-1), gsl_matrix_get(mna, (pos-1), (pos-1)) + value);
-        gsl_vector_set(x_help,(pos-1),pos);
+        gsl_vector_set(x_help,(pos-1),cont->pos);
     	return(1);
     }
     
@@ -52,8 +54,8 @@ int MNA_conductance(struct element *cont, int node_sum, int m2_elem){
     gsl_matrix_set (mna, (pos-1), (neg-1), gsl_matrix_get(mna, (pos-1), (neg-1)) - value);
     gsl_matrix_set (mna, (neg-1), (pos-1), gsl_matrix_get(mna, (neg-1), (pos-1)) - value);
 
-    gsl_vector_set(x_help,(neg-1),neg);
-    gsl_vector_set(x_help,(pos-1),pos);
+    gsl_vector_set(x_help,(neg-1),cont->neg);
+    gsl_vector_set(x_help,(pos-1),cont->pos);
     
     return(0);
 }
@@ -69,23 +71,50 @@ int MNA_power(struct element *power){
     
     if(pos == 0){
         gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
-        gsl_vector_set(x_help,(neg-1),neg);
+        gsl_vector_set(x_help,(neg-1),power->neg);
     	return 1;
     }
     if(neg == 0){
     	gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
-        gsl_vector_set(x_help,(pos-1),pos);
+        gsl_vector_set(x_help,(pos-1),power->pos);
     	return 1;
     }
    
     gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
     gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
 
-    gsl_vector_set(x_help,(neg-1),neg);
-    gsl_vector_set(x_help,(pos-1),pos);
+    gsl_vector_set(x_help,(neg-1),power->neg);
+    gsl_vector_set(x_help,(pos-1),power->pos);
     return 0;
 
 }
+
+int MNA_power_dc(struct element *power, double value, double old_value){
+    unsigned long int pos, neg;
+    
+    pos = find_index(power->pos);
+    neg = find_index(power->neg); 
+    
+    if(pos == 0){
+        gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) - old_value);
+        gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
+        return 1;
+    }
+    if(neg == 0){
+        gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) + old_value);
+        gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
+        return 1;
+    }
+        // printf("MNA_power_dc %lf\n", gsl_vector_get(b,(neg-1)));
+   
+    gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) - old_value);
+    gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
+    gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) + old_value);
+    gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
+
+    return 0;
+}
+
 
 int MNA_voltage(struct element *vol, int node_sum, int m2_elem){
     unsigned long int pos, neg;
@@ -109,12 +138,12 @@ int MNA_voltage(struct element *vol, int node_sum, int m2_elem){
     if(pos != 0){
         gsl_matrix_set (mna, (node_sum + vol_counter -1), (pos-1), gsl_matrix_get(mna, (node_sum + vol_counter -1), (pos-1)) + 1);
         gsl_matrix_set (mna, (pos-1), (node_sum + vol_counter -1), gsl_matrix_get(mna, (pos-1), (node_sum + vol_counter -1 )) + 1);
-        gsl_vector_set(x_help,(pos-1),pos);
+        gsl_vector_set(x_help,(pos-1),vol->pos);
     }
     if(neg != 0){
         gsl_matrix_set (mna, (node_sum + vol_counter -1), (neg-1), gsl_matrix_get(mna, (node_sum + vol_counter -1), (neg-1)) - 1);
         gsl_matrix_set (mna, (neg-1), (node_sum + vol_counter -1), gsl_matrix_get(mna, (neg-1), (node_sum + vol_counter -1)) - 1);
-        gsl_vector_set(x_help,(neg-1),neg);
+        gsl_vector_set(x_help,(neg-1),vol->neg);
     }
     vol->b_position = vol_counter;
     vol_counter++; 
@@ -125,7 +154,6 @@ int MNA_voltage_dc(struct element *vol,double value, int node_sum){
 
     //prosthiki sto dianusma b
     gsl_vector_set(b,(node_sum - 1 + vol->b_position),value);
-    
     
     return 0;
 }
@@ -158,7 +186,7 @@ void print_MNA(int node_sum, int m2_elem){
     printf("\n----x_help----\n");
     for(i=0; i<(node_sum+m2_elem-1); i++){
     
-       printf("%g \n",gsl_vector_get(x_help,i));
+       printf("%lu \n",find_index(gsl_vector_get(x_help,i)));
     
     }
     
@@ -181,32 +209,30 @@ void constructor(int node_sum, int m2_elem, struct element *head){
 }
 
 int LU_analysis(int node_sum,int m2_elem){
-    int s;
+    int s, i, j;
 
-    x = gsl_vector_alloc ((node_sum+m2_elem-1));
+    gsl_matrix *l = gsl_matrix_alloc ((node_sum+m2_elem-1), (node_sum+m2_elem-1));
     gsl_permutation * p = gsl_permutation_alloc ((node_sum+m2_elem-1));
 
-    gsl_linalg_LU_decomp (mna, p, &s);
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
+        }
+    }
+
+    gsl_linalg_LU_decomp (l, p, &s);
     
-    gsl_linalg_LU_solve (mna, p, b, x);
-
-    // printf ("x_help = \n");
-    // gsl_vector_fprintf (stdout, x_help, "%g");
-
+    gsl_linalg_LU_solve (l, p, b, x);
     gsl_permutation_free (p);
+    gsl_matrix_free(l);
 
     return (0);
 }
 
 int Cholesky_analysis(int node_sum,int m2_elem){
-    // int s;
 
-
-    printf("CHOLESKY\n\n");
     int check = 1, s, i , j;
     double element;
-    
-    x = gsl_vector_alloc ((node_sum+m2_elem-1));
 
     double check_cholesky;
 
@@ -245,13 +271,23 @@ int Cholesky_analysis(int node_sum,int m2_elem){
     }
 
 
-    check = gsl_linalg_cholesky_decomp(mna);
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
+        }
+    }
+    // gsl_vector_fprintf (stdout, x, "%g");
+    check = gsl_linalg_cholesky_decomp(l);
     if(check != GSL_SUCCESS){   
         printf("%d\n", check );
     }
-    gsl_linalg_cholesky_solve (mna, b, x);
+    
+
+    gsl_linalg_cholesky_solve (l, b, x);
     // printf ("x = \n");
     // gsl_vector_fprintf (stdout, x, "%g");
+    gsl_permutation_free (p);
+    gsl_matrix_free(l);
 
     return (0);
 }
