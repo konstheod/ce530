@@ -14,6 +14,7 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
+#include <gsl/gsl_eigen.h>
 
 
 #define NODE_SIZE 40
@@ -111,6 +112,8 @@ int m2_elem(void);
 
 /*solve Ax = b with LU*/
 int LU_analysis(int node,int m2_elem);
+/*checking if the matrix MNA is SPD*/
+int if_SPD(int node_sum,int m2_elem);
 /*solve Ax = b with Cholesky*/
 int Cholesky_analysis(int node_sum,int m2_elem);
 
@@ -119,5 +122,7 @@ int plot(struct element *head);
 
 /*prints the value of x without DC*/
 void print_x(void);
+
+
 
 #endif

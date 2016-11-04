@@ -231,63 +231,94 @@ int LU_analysis(int node_sum,int m2_elem){
 
 int Cholesky_analysis(int node_sum,int m2_elem){
 
-    int check = 1, s, i , j;
-    double element;
-
-    double check_cholesky;
+    int check = 1, i , j;
 
     gsl_matrix *l = gsl_matrix_alloc ((node_sum+m2_elem-1), (node_sum+m2_elem-1));
-    gsl_permutation * p = gsl_permutation_alloc ((node_sum+m2_elem-1));
 
     for(i=0; i<(node_sum+m2_elem-1); i++){
         for(j=0; j<(node_sum+m2_elem-1); j++){
             gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
         }
     }
-
-    gsl_linalg_LU_decomp (l, p, &s);
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-        for(j=0; j<(node_sum+m2_elem-1); j++){
-            if(i == j){
-                gsl_matrix_set(l,i,j,1);
-            }
-            else if(i<j){
-                gsl_matrix_set(l,i,j,0);
-            }
-        }
+    
+    check = if_SPD(node_sum,m2_elem);
+    if(check == -1){
+        return -1;
     }
 
-           
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-        check_cholesky = 0;
-        for(j=0; j<(i-1); j++){
-            check_cholesky += gsl_matrix_get(l,i,j) * gsl_matrix_get(l,i,j);
-        }
-        element = gsl_matrix_get(mna,i,i);
-        if(element < check_cholesky){
-            printf("ERROR: matrix is not SPD, %d\n", i);
-            return -1;
-        }
-    }
-
-
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-        for(j=0; j<(node_sum+m2_elem-1); j++){
-            gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
-        }
-    }
-    // gsl_vector_fprintf (stdout, x, "%g");
     check = gsl_linalg_cholesky_decomp(l);
     if(check != GSL_SUCCESS){   
         printf("%d\n", check );
+        return -2;
     }
+    
     
 
     gsl_linalg_cholesky_solve (l, b, x);
     // printf ("x = \n");
     // gsl_vector_fprintf (stdout, x, "%g");
-    gsl_permutation_free (p);
     gsl_matrix_free(l);
 
     return (0);
 }
+
+int if_SPD(int node_sum,int m2_elem){
+
+    int i,j;
+    gsl_matrix *l = gsl_matrix_alloc ((node_sum+m2_elem-1), (node_sum+m2_elem-1));
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            gsl_matrix_set(l,i,j,gsl_matrix_get(mna,i,j));
+        }
+    }
+    gsl_vector *eval = gsl_vector_alloc (node_sum+m2_elem-1);
+    gsl_matrix *evec = gsl_matrix_alloc (node_sum+m2_elem-1, node_sum+m2_elem-1);
+
+    gsl_eigen_symmv_workspace * w = gsl_eigen_symmv_alloc (node_sum+m2_elem-1);
+
+    gsl_eigen_symmv (l, eval, evec, w);
+
+    gsl_eigen_symmv_free (w);
+
+    gsl_eigen_symmv_sort (eval, evec, 
+                        GSL_EIGEN_SORT_ABS_ASC);
+  
+  
+
+    // for (i = 0; i < (node_sum+m2_elem-1); i++)
+    // {
+    //     double eval_i = gsl_vector_get (eval, i);
+    //     gsl_vector_view evec_i = gsl_matrix_column (evec, i);
+
+    //     printf ("eigenvalue = %g\n", eval_i);
+    //     printf ("eigenvector = \n");
+    //     gsl_vector_fprintf (stdout, &evec_i.vector, "%g");
+    // }
+
+    int flag = 0;
+    for (i = 0; i < (node_sum+m2_elem-1); i++){
+        if(gsl_vector_get (eval, i) <= 0){ 
+            flag = 1;
+        }
+    }
+
+    if(flag == 1){
+        printf("the matrix is not positive definite\n");
+        gsl_vector_free (eval);
+        gsl_matrix_free (evec);
+        return -1;
+    }
+    else {
+        gsl_vector_free (eval);
+        gsl_matrix_free (evec);
+        return 0;
+    }
+
+
+
+    gsl_vector_free (eval);
+    gsl_matrix_free (evec);
+
+  return 0;
+}
+

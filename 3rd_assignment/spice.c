@@ -10,7 +10,7 @@ gsl_vector *x_help;
 int main(int argc, char *argv[]){
 	int fd;
 	char file_name[50];
-	int i;	
+	int i, check;	
 
 	for(i = 0; i < HASH_TABLE_SIZE; i++){
 	    
@@ -39,18 +39,24 @@ int main(int argc, char *argv[]){
 	head = NULL;
 
 	//parsing the elements
+	printf("Parsing the %s\n",file_name);
 	parser(&head, fd);
 	
 	// printList(head);
 	//make mna
+	printf("Constructs the MNA matrix and b vector\n");
 	constructor(nodes(),m2_elem(), head);
 	// print_MNA(nodes(),m2_elem());
 	if(if_cholesky == 0){
+		printf("Computing x with LU analysis \n");
 	 	LU_analysis(nodes(),m2_elem());
 	} else {
-		Cholesky_analysis(nodes(),m2_elem());
+		printf("Computing x with Cholesky analysis \n");
+		check = Cholesky_analysis(nodes(),m2_elem());
+		if(check == -1){
+			return -1;
+		}
 	}
-
 	print_x();
 	
 	//handles PRINT|PLOT if exist in netlist
@@ -60,6 +66,7 @@ int main(int argc, char *argv[]){
 	free_mna();
 	free_elements(&head);
 	free_nodes(hash_table);
+
 		
 	//close file
 	close(fd);
@@ -69,11 +76,33 @@ int main(int argc, char *argv[]){
 void print_x(){
 	int fd_dc, check, i;
 	char curr_write[20];
+	int new_file = 0;
+	char file_name[20];
 
-	fd_dc = open("DC op_point.txt", O_CREAT | O_WRONLY, 0777);
-	if(fd_dc<0){
-		printf("Error at the opening of the file.\n");
-		return;
+	
+	strcpy(file_name, "DC op_point.txt");
+
+	while(1){
+		fd_dc = open(file_name, O_RDONLY, 0777);
+		if(fd_dc>0){
+			new_file++;
+			for(i = 11; i < strlen(file_name); i++){
+				file_name[i] = '\0';
+			}
+			strcat(file_name,"(");
+			sprintf(curr_write,"%d", new_file);
+			strcat(file_name,curr_write);
+			strcat(file_name,").txt");
+			close(fd_dc);
+		}
+		else if(fd_dc<0){
+			fd_dc = open(file_name, O_CREAT | O_WRONLY, 0777);
+			if(fd_dc < 0){
+				perror("open");
+				return;
+			}
+			break;
+		}
 	}
 	if(if_cholesky == 1){
 		check = write(fd_dc, "Cholesky_analysis\n", strlen("Cholesky_analysis\n"));
@@ -85,7 +114,7 @@ void print_x(){
 		perror("write");
 		return;
 	}
-	check = write(fd_dc, "\nV(0) = 0.000000\n", strlen("\nV(0) = 0.000000\n"));
+	check = write(fd_dc, "\nV(0) = 0.000000 Volt\n", strlen("\nV(0) = 0.000000 Volt\n"));
 	if(check<0){
 		perror("write");
 		return;
