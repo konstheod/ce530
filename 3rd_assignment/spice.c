@@ -42,21 +42,38 @@ int main(int argc, char *argv[]){
 	printf("Parsing the %s\n",file_name);
 	parser(&head, fd);
 	
-	// printList(head);
-	//make mna
+	printList(head);
+	// make mna
 	printf("Constructs the MNA matrix and b vector\n");
 	constructor(nodes(),m2_elem(), head);
 	// print_MNA(nodes(),m2_elem());
-	if(if_cholesky == 0){
-		printf("Computing x with LU analysis \n");
-	 	LU_analysis(nodes(),m2_elem());
-	} else {
+	if(if_cholesky){
 		printf("Computing x with Cholesky analysis \n");
 		check = Cholesky_analysis(nodes(),m2_elem());
 		if(check == -1){
 			return -1;
 		}
 	}
+	else if(if_CG){
+		printf("Computing x with CG analysis \n");
+		check = CG_analysis(nodes(),m2_elem());
+		if(check == -1){
+			return -1;
+		}
+	}
+	else if(if_Bi_CG){
+		printf("Computing x with Bi_CG analysis \n");
+		check = Bi_CG_analysis(nodes(),m2_elem());
+		if(check == -1){
+			printf("Mulfunction with Bi_CG analysis \n");
+			return -1;
+		}
+	}
+	else{
+		printf("Computing x with LU analysis \n");
+	 	LU_analysis(nodes(),m2_elem());
+	}
+
 	print_x();
 	
 	//handles PRINT|PLOT if exist in netlist
@@ -104,8 +121,14 @@ void print_x(){
 			break;
 		}
 	}
-	if(if_cholesky == 1){
+	if(if_cholesky){
 		check = write(fd_dc, "Cholesky_analysis\n", strlen("Cholesky_analysis\n"));
+	}
+	else if(if_CG){
+		check = write(fd_dc, "CG_analysis\n", strlen("CG_analysis\n"));
+	}
+	else if(if_Bi_CG){
+		check = write(fd_dc, "Bi_CG_analysis\n", strlen("Bi_CG_analysis\n"));
 	}
 	else{
 		check = write(fd_dc, "LU_analysis\n", strlen("LU_analysis\n"));

@@ -20,6 +20,9 @@ int parser(struct element **element_head, int fd){
 	curr = NULL;
 
 	if_cholesky = 0;
+	if_CG = 0;
+	if_Bi_CG = 0;
+	itol = 1e-3;
 
 	while(1){
 		check = read(fd, input, 100);
@@ -377,11 +380,16 @@ int parser(struct element **element_head, int fd){
 							i = 0;
 						}
 					}
-					if(input[i] == 'S'){
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
+					while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+						node_name[k] = input[i];
+						k++;
 						i++;
 						if(check==i){
 							check = read(fd, input, 100);
-			
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -389,11 +397,12 @@ int parser(struct element **element_head, int fd){
 							}
 							i = 0;
 						}
-						if(input[i] == 'P'){
+					}
+					if(!strcmp(node_name,"SPD")){
+						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
 								check = read(fd, input, 100);
-				
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -401,11 +410,106 @@ int parser(struct element **element_head, int fd){
 								}
 								i = 0;
 							}
-							if(input[i] == 'D'){
-								if_cholesky = 1;
+						}
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
 							}
 						}
+						if(!strcmp(node_name,"ITER")){
+							if_CG = 1;
+						}
+						else{
+							if_cholesky = 1;
+						}
+
 					}
+					else if(!strcmp(node_name,"ITER")){
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						if(!strcmp(node_name,"SPD")){
+							if_CG = 1;
+						}
+						else{
+							if_Bi_CG = 1;
+						}
+					}
+					else if(!strcmp(node_name,"ITOL")){
+						while(input[i] == '\t' || input[i] == ' ' || input[i] == '='){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						itol  =atof(node_name);
+
+					}
+						
 				}
 			}
 			else{
@@ -1080,13 +1184,30 @@ int plot(struct element *head){
 				}
 
 				//solve the system Ax = b
-				if(if_cholesky == 0){
-					LU_analysis(nodes(),m2_elem());
-				} else {
+				if(if_cholesky){
+					printf("Computing x with Cholesky analysis \n");
 					check = Cholesky_analysis(nodes(),m2_elem());
 					if(check == -1){
 						return -1;
 					}
+				}
+				else if(if_CG){
+					printf("Computing x with CG analysis \n");
+					check = CG_analysis(nodes(),m2_elem());
+					if(check == -1){
+						return -1;
+					}
+				}
+				else if(if_Bi_CG){
+					printf("Computing x with Bi_CG analysis \n");
+					check = Bi_CG_analysis(nodes(),m2_elem());
+					if(check == -1){
+						return -1;
+					}
+				}
+				else{
+					printf("Computing x with LU analysis \n");
+				 	LU_analysis(nodes(),m2_elem());
 				}
 
 				//find the node you want to print
@@ -1094,16 +1215,54 @@ int plot(struct element *head){
 					if(gsl_vector_get(x_help,k) == if_print[i]){
 
 						//write the results to file
+						sprintf(curr_write,"%c", curr->type);
+						check = write(fd, curr_write, strlen(curr_write));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
+						check = write(fd, curr->name, strlen(curr->name));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
+						check = write(fd, " = " , strlen(" = "));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
 						sprintf(curr_write,"%lf", j);
 						check = write(fd, curr_write, strlen(curr_write));
 						if(check<0){
 							perror("write");
 							return -1;
 						}
+						if(strlen(curr_write) < 9){
+							check = write(fd, " " , strlen(" "));
+							if(check<0){
+								perror("write");
+								return -1;
+							}
+						}
 						for(check = 0; check < 20; check++){
 							curr_write[check] = '\0';
 						}
-						check = write(fd, "\t" , strlen(" "));
+						check = write(fd, "\t" , strlen("\t"));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
+						check = write(fd, "V(" , strlen("V("));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
+						check = write(fd, find_value(if_print[i]) , strlen(find_value(if_print[i])));
+						if(check<0){
+							perror("write");
+							return -1;
+						}
+						check = write(fd, ") = " , strlen(") = "));
 						if(check<0){
 							perror("write");
 							return -1;

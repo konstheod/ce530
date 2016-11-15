@@ -24,6 +24,7 @@
 #define SIZE_NAME 20
 #define NODE_SIZE 40
 #define PREC 15
+#define EPS 1e-14
 
 
 struct node{
@@ -65,6 +66,9 @@ extern gsl_vector *x_help;
 extern gsl_vector *x;
 
 int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else is set to 0
+int if_Bi_CG;
+int	if_CG;
+double itol;
 unsigned long int *if_print; //apothhkeuodai oi metavlhtes pou einai na ginoun PLOT/PRINT
 
 /*creates hash code for a node*/
@@ -116,6 +120,14 @@ int LU_analysis(int node,int m2_elem);
 int if_SPD(int node_sum,int m2_elem);
 /*solve Ax = b with Cholesky*/
 int Cholesky_analysis(int node_sum,int m2_elem);
+int CG_analysis(int node_sum,int m2_elem);
+int Bi_CG_analysis(int node_sum, int m2_elem);
+void precondition_solver(gsl_vector *r, gsl_vector *z, gsl_vector *MNA_diag, int node_sum,int m2_elem);
+double inner_product(gsl_vector *r, gsl_vector *z, int node_sum, int m2_elem);
+void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *mnaT);
+void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2_elem);
+void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
+void matrxix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
 
 /*prints to file the result of print*/
 int plot(struct element *head);
