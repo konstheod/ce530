@@ -127,7 +127,7 @@ double inner_product(gsl_vector *r, gsl_vector *z, int node_sum, int m2_elem);
 void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *mnaT);
 void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2_elem);
 void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
-void matrxix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
+void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
 
 /*prints to file the result of print*/
 int plot(struct element *head);

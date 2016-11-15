@@ -293,7 +293,7 @@ int CG_analysis(int node_sum, int m2_elem){
     }
 
     norm_b = gsl_blas_dnrm2(b);
-    if(abs(norm_b) <= EPS){
+    if(fabs(norm_b) <= EPS){
         norm_b = 1;
     }
     while(1){
@@ -358,6 +358,7 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
     gsl_matrix *mnaT = gsl_matrix_alloc((node_sum+m2_elem-1),(node_sum+m2_elem-1));
     gsl_vector *MNA_diagT = gsl_vector_alloc(node_sum+m2_elem-1);
     get_diag_matrix(MNA_diag, node_sum, m2_elem, 0, NULL);
+    matrix_transpose(mnaT, mna, node_sum, m2_elem);
     get_diag_matrix(MNA_diagT, node_sum, m2_elem, 1, mnaT);
 
     for(i = 0; i<(node_sum+m2_elem-1); i++){
@@ -373,7 +374,7 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
     }
 
     norm_b = gsl_blas_dnrm2(b);
-    if(abs(norm_b) <= EPS){
+    if(fabs(norm_b) < EPS){
         norm_b = 1;
     }
     while(1){
@@ -389,7 +390,8 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
         precondition_solver(r1, z1, MNA_diagT, node_sum, m2_elem);
 
         rho = inner_product(r1, z, node_sum, m2_elem);
-        if(abs(rho) < EPS){
+        if(fabs(rho) < EPS){
+            printf("eeeeee %lf\n", fabs(rho));
             return -1;
         }
 
@@ -409,7 +411,8 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
         mul_vector_matrix(q, p, 0, NULL);
         mul_vector_matrix(q1, p1,1,mnaT);
         omega = inner_product(p1, q, node_sum, m2_elem);
-        if(abs(omega) < EPS){
+        if(fabs(omega) < EPS){
+            printf("AAA\n");
             return -1;
         }
         alpha = rho/omega;
@@ -542,7 +545,7 @@ void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check,
     }
 }
 
-void matrxix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem){
+void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem){
     int i;
     gsl_vector *row = gsl_vector_alloc(node_sum+m2_elem-1);
 
