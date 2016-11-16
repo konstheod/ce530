@@ -24,7 +24,7 @@
 #define SIZE_NAME 20
 #define NODE_SIZE 40
 #define PREC 15
-#define EPS 1e-14
+#define EPS 1e-16
 
 
 struct node{

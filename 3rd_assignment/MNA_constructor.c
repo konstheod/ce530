@@ -299,7 +299,7 @@ int CG_analysis(int node_sum, int m2_elem){
     while(1){
 
         norm_r = gsl_blas_dnrm2(r);
-        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem-1)){
+        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem)*2){
             break;
         }
 
@@ -380,7 +380,7 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
     while(1){
 
         norm_r = gsl_blas_dnrm2(r);
-        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem-1)){
+        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem)*2){
             break;
         }
 
@@ -391,7 +391,6 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
 
         rho = inner_product(r1, z, node_sum, m2_elem);
         if(fabs(rho) < EPS){
-            printf("eeeeee %lf\n", fabs(rho));
             return -1;
         }
 
@@ -412,7 +411,6 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
         mul_vector_matrix(q1, p1,1,mnaT);
         omega = inner_product(p1, q, node_sum, m2_elem);
         if(fabs(omega) < EPS){
-            printf("AAA\n");
             return -1;
         }
         alpha = rho/omega;
