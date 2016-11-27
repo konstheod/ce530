@@ -80,15 +80,13 @@ int free_nodes(struct node * hash_table[]){
 	for(i = 0; i < HASH_TABLE_SIZE; i++){
 	    hash_head = hash_table[i];
 	    while(hash_head != NULL){
-		next = hash_head->next;
-		free(hash_head);
-		hash_head = next;
+			next = hash_head->next;
+			free(hash_head);
+			hash_head = next;
+		}
+		hash_table[i] = hash_head;
 	}
-
-	hash_table[i] = hash_head;
-	}
-	
-	
+		
 	return(1);
 }
 

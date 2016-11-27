@@ -74,6 +74,8 @@ int main(int argc, char *argv[]){
 	 	LU_analysis(nodes(),m2_elem());
 	}
 
+	sparse_matrix(nodes(), m2_elem());
+
 	print_x();
 	
 	//handles PRINT|PLOT if exist in netlist
@@ -137,20 +139,20 @@ void print_x(){
 		perror("write");
 		return;
 	}
-	check = write(fd_dc, "\nV(0) = 0.000000 Volt\n", strlen("\nV(0) = 0.000000 Volt\n"));
+	check = write(fd_dc, "\nV(0) = 0.000000 Volt\n\n", strlen("\nV(0) = 0.000000 Volt\n\n"));
 	if(check<0){
 		perror("write");
 		return;
 	}
 
-	for(i = 0; i< nodes() - 1; i++){
-		check = write(fd_dc, "V(", strlen("V("));
+	for(i = 0; i< nodes() + m2_elem() - 1; i++){
+		check = write(fd_dc, "x(", strlen("V("));
 		if(check<0){
 			perror("write");
 			return;
 		}
-		sprintf(curr_write,"%s", find_value(gsl_vector_get(x_help,i)));
-		check = write(fd_dc, find_value(gsl_vector_get(x_help,i)), strlen(find_value(gsl_vector_get(x_help,i))));
+		sprintf(curr_write,"%d", i+1);
+		check = write(fd_dc, curr_write, strlen(curr_write));
 		if(check<0){
 			perror("write");
 			return;

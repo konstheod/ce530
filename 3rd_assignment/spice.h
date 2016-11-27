@@ -16,6 +16,7 @@
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_eigen.h>
 
+#include "Sparse/CXSparse/Include/cs.h"
 
 #define NODE_SIZE 40
 #define HASH_TABLE_SIZE 2000
@@ -69,6 +70,7 @@ int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else
 int if_Bi_CG;
 int	if_CG;
 double itol;
+int if_sparse;
 unsigned long int *if_print; //apothhkeuodai oi metavlhtes pou einai na ginoun PLOT/PRINT
 
 /*creates hash code for a node*/
@@ -115,19 +117,24 @@ void printList(struct element *head);
 int m2_elem(void);
 
 /*solve Ax = b with LU*/
-int LU_analysis(int node,int m2_elem);
+int LU_analysis(int node, int m2_elem);
 /*checking if the matrix MNA is SPD*/
-int if_SPD(int node_sum,int m2_elem);
+int if_SPD(int node_sum, int m2_elem);
 /*solve Ax = b with Cholesky*/
-int Cholesky_analysis(int node_sum,int m2_elem);
-int CG_analysis(int node_sum,int m2_elem);
+int Cholesky_analysis(int node_sum, int m2_elem);
+/*solve Ax = b with CG_analysis*/
+int CG_analysis(int node_sum, int m2_elem);
+/*solve Ax = b with Bi_CG_analysis*/
 int Bi_CG_analysis(int node_sum, int m2_elem);
+/*solve Mz = r (preconditioner)*/
 void precondition_solver(gsl_vector *r, gsl_vector *z, gsl_vector *MNA_diag, int node_sum,int m2_elem);
 double inner_product(gsl_vector *r, gsl_vector *z, int node_sum, int m2_elem);
 void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *mnaT);
 void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2_elem);
 void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
 void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
+
+void sparse_matrix(int node_sum, int m2_elem);
 
 /*prints to file the result of print*/
 int plot(struct element *head);

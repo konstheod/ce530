@@ -183,12 +183,6 @@ void print_MNA(int node_sum, int m2_elem){
 	
     }
 
-    printf("\n----x_help----\n");
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-    
-       printf("%lu \n",find_index(gsl_vector_get(x_help,i)));
-    
-    }
     
     printf("\n");
 }
@@ -552,4 +546,40 @@ void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_el
         gsl_matrix_set_col(dest, i, row);
     }   
     gsl_vector_free(row);
+}
+
+void sparse_matrix(int node_sum, int m2_elem){
+    cs_di *sparse_MNA, *compressed_MNA;
+    int len  = node_sum -1 + m2_elem;
+    int i, j;
+    int non_zer = len*len;
+    double value;
+    
+    for(i = 0; i < len; i++){
+        for(j = 0; j < len; j++){
+            if(gsl_matrix_get(mna,i,j) == 0){
+                non_zer--;
+            }
+        }
+    }
+
+    
+    sparse_MNA = cs_di_spalloc(len, len, non_zer, 1, 1);
+
+    for(i = 0; i < len; i++){
+        for(j = 0; j < len; j++){
+            value = gsl_matrix_get(mna,i,j);
+            if(value != 0.0){
+                cs_di_entry (sparse_MNA, i, j, value);
+            }
+        }
+    }
+    sparse_MNA->nz = non_zer;
+
+    compressed_MNA = cs_di_compress(sparse_MNA);
+    cs_di_spfree(sparse_MNA);
+    cs_di_dupl(compressed_MNA);
+    cs_di_print (compressed_MNA,1);
+
+    cs_di_spfree(compressed_MNA);
 }

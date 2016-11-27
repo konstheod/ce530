@@ -23,6 +23,7 @@ int parser(struct element **element_head, int fd){
 	if_CG = 0;
 	if_Bi_CG = 0;
 	itol = 1e-3;
+	if_sparse = 0;
 
 	while(1){
 		check = read(fd, input, 100);
@@ -396,6 +397,39 @@ int parser(struct element **element_head, int fd){
 								return(-1);
 							}
 							i = 0;
+						}
+					}
+					if(!strcmp(node_name,"SPARSE")){
+						if_sparse = 1;
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							if(check==i){
+								check = read(fd, input, 100);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
 						}
 					}
 					if(!strcmp(node_name,"SPD")){
