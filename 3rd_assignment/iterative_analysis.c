@@ -21,11 +21,6 @@ int CG_analysis(int node_sum, int m2_elem){
     gsl_vector *q = gsl_vector_alloc(node_sum+m2_elem-1);
     gsl_vector *MNA_diag = gsl_vector_alloc(node_sum+m2_elem-1);
     get_diag_matrix(MNA_diag, node_sum, m2_elem, 0, NULL);
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-    
-       printf("%g \n",gsl_vector_get(MNA_diag,i));
-    
-    }
     for(i = 0; i<(node_sum+m2_elem-1); i++){
         gsl_vector_set(x,i,0);
         gsl_vector_set(q,i,0);
@@ -47,6 +42,7 @@ int CG_analysis(int node_sum, int m2_elem){
 
         precondition_solver(r, z, MNA_diag, node_sum, m2_elem);
 
+
         rho = inner_product(r, z, node_sum, m2_elem);
 
         if(iter == 1) {
@@ -60,9 +56,12 @@ int CG_analysis(int node_sum, int m2_elem){
 
         rho1 = rho;
         mul_vector_matrix(q, p, 0, NULL);
+        
         alpha = rho/inner_product(p, q, node_sum, m2_elem);
+
         axpy_solve(alpha, x, p, node_sum, m2_elem);
         axpy_solve(-alpha, r, q, node_sum, m2_elem);
+        
 
     }
 

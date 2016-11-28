@@ -193,8 +193,9 @@ void mul_vector_matrix_sparse(cs_di *compressed_MNA, double *x, double *y, int n
     int j,p;
 
     for(j = 0; j < (node_sum+m2_elem-1); j++ ){
+        y[j] = 0.0;
         for(p = compressed_MNA->p[j]; p < compressed_MNA->p[j+1]; p++ ){
-            y[compressed_MNA->i[p]] = y[compressed_MNA->i[p]] + compressed_MNA->x[p]*x[j];
+            y[j] = y[j] + compressed_MNA->x[p]*x[compressed_MNA->i[p]];
         }
     }
 
@@ -209,7 +210,7 @@ void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_
     }
 
     for(i = 0; i<(node_sum+m2_elem-1); i++){
-        y[i] = alpha*x[i] + curr_y[i];
+        y[i] = curr_y[i] + alpha*x[i] ;
     }
 
     free(curr_y);

@@ -79,10 +79,6 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     double *q = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     double *MNA_diag = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     get_diag_matrix_sparse(compressed_MNA, MNA_diag, node_sum, m2_elem);
-    printf("-----------------------MNA_DIAG_SPARSE-----------------------\n");
-	for(i = 0; i < (node_sum - 1 + m2_elem); i++){
-		printf("%lf\n", MNA_diag[i]);
-	}
 
     for(i = 0; i<(node_sum+m2_elem-1); i++){
         x_sparse[i] = 0;
@@ -114,6 +110,7 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
         }
         else {
             beta = rho/rho1;
+            
             for(i = 0; i<(node_sum+m2_elem-1); i++){
         		p[i] = z[i] + beta*p[i];
         	}
@@ -121,10 +118,12 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 
         rho1 = rho;
         mul_vector_matrix_sparse(compressed_MNA, p, q, node_sum, m2_elem);
+
         alpha = rho/inner_product_sparse(p, q, node_sum, m2_elem);
 
-        axpy_solve_sparse(alpha, x_sparse, p, node_sum, m2_elem);
-        axpy_solve_sparse(-alpha, r, q, node_sum, m2_elem);
+        axpy_solve_sparse(alpha, p, x_sparse, node_sum, m2_elem);
+        axpy_solve_sparse(-alpha, q, r, node_sum, m2_elem);
+
 
     }
 
