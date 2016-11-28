@@ -19,7 +19,7 @@
 #include "Sparse/CXSparse/Include/cs.h"
 
 #define NODE_SIZE 40
-#define HASH_TABLE_SIZE 2000
+#define HASH_TABLE_SIZE 4
 
 #define SIZE_VALUE 20
 #define SIZE_NAME 20
@@ -38,8 +38,8 @@ struct node{
 
 struct element{
 	char type; 
-	long int pos;
-	long int neg;
+	unsigned long int pos;
+	unsigned long int neg;
 	double value;
 	long int D; //for transistor
 	long int G; //for transistor
@@ -74,15 +74,15 @@ int if_sparse;
 unsigned long int *if_print; //apothhkeuodai oi metavlhtes pou einai na ginoun PLOT/PRINT
 
 /*creates hash code for a node*/
-unsigned int hash(char *name);
+unsigned long int hash(char *name);
 /*finds hash code(key) from a node name*/
-long int find_node(char *name);
+unsigned long int find_node(char *name);
 /*finds node name from hash code(key)*/
-char* find_value( long int key);
+char* find_value( unsigned long int key);
 /*finds node index from hash code(key)*/
-unsigned long int find_index( long int key);
+unsigned long int find_index( unsigned long int key);
 /*adds node to hash_table*/
-long int add_node(char *name);
+unsigned long int add_node(char *name);
 /*free hash table*/
 int free_nodes(struct node * hash_table[]);
 /*return the number of nodes*/
@@ -118,14 +118,16 @@ int m2_elem(void);
 
 /*solve Ax = b with LU*/
 int LU_analysis(int node, int m2_elem);
-/*checking if the matrix MNA is SPD*/
-int if_SPD(int node_sum, int m2_elem);
 /*solve Ax = b with Cholesky*/
 int Cholesky_analysis(int node_sum, int m2_elem);
+
 /*solve Ax = b with CG_analysis*/
 int CG_analysis(int node_sum, int m2_elem);
 /*solve Ax = b with Bi_CG_analysis*/
 int Bi_CG_analysis(int node_sum, int m2_elem);
+
+/*checking if the matrix MNA is SPD*/
+int if_SPD(int node_sum, int m2_elem);
 /*solve Mz = r (preconditioner)*/
 void precondition_solver(gsl_vector *r, gsl_vector *z, gsl_vector *MNA_diag, int node_sum,int m2_elem);
 double inner_product(gsl_vector *r, gsl_vector *z, int node_sum, int m2_elem);
@@ -134,7 +136,19 @@ void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2
 void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
 void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
 
+void get_b_sparse(double *b_sparse, int node_sum, int m2_elem);
+void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem);
+double norm_sparse(double *sparse, int node_sum, int m2_elem);
+void precondition_solver_sparse(double *r, double *z, double *MNA_diag, int node_sum, int m2_elem);
+double inner_product_sparse(double *r, double *z, int node_sum, int m2_elem);
+void mul_vector_matrix_sparse(cs_di *compressed_MNA, double *x, double *y, int node_sum, int m2_elem);
+void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_elem);
+
 void sparse_matrix(int node_sum, int m2_elem);
+void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
+void sparse_Cholesky_analysis();
+void sparse_CG_analysis();
+void sparse_Bi_CG_analysis();
 
 /*prints to file the result of print*/
 int plot(struct element *head);

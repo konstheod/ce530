@@ -1105,7 +1105,7 @@ void printList(struct element *head){
 	for(curr = head; curr != NULL; curr = curr->next){
 		if(curr->type == 'R' || curr->type == 'C' || curr->type == 'L' || curr->type == 'V' || curr->type == 'I'){
 
-			printf("%d: %c%s %lu %lu %.*lf \n",i, curr->type, curr->name, find_index(curr->pos), find_index(curr->neg), PREC,curr->value);
+			printf("%d: %c%s %s %s %.*lf \n",i, curr->type, curr->name, find_value(curr->pos), find_value(curr->neg), PREC,curr->value);
 			
 		}
 		else if(curr->type == 'D'){

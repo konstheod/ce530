@@ -4,49 +4,76 @@ long int counter = 1;
 
 struct node * hash_table[HASH_TABLE_SIZE];
 
-unsigned int hash(char *name){
-   unsigned int hash_code = 5381;
+unsigned long int hash(char *name){
+   unsigned long int hash_code = 5381;
    int i = 0;
    for(i = 0; name[i] != '\0'; i++){
 	hash_code = (hash_code << 5) + hash_code + name[i];
    }
-   return (hash_code%HASH_TABLE_SIZE);
+   return (hash_code);
     
 }
 
-long int find_node(char *name){
+unsigned long int find_node(char *name){
 	
-	int hashIndex = hash(name);  
-	
-   while(hash_table[hashIndex] != NULL){
-	
-      if(strcmp(hash_table[hashIndex]->name, name)==0)
-         return hash_table[hashIndex]->key; 
-			
-      ++hashIndex;
-		
-      hashIndex %= HASH_TABLE_SIZE;
-   }    
+	int hashIndex = hash(name)%HASH_TABLE_SIZE;  
+	struct node *curr, *head;
+
+	head = hash_table[hashIndex];
+	if(head==NULL){
+		return(-1);
+	}
+
+	for(curr = head; curr != NULL; curr = curr->next){
+		if(strcmp(name,curr->name) == 0){
+			return curr->key;
+		}
+	}
+	   
 	return(-1);
 }
 
-char* find_value( long int key){
+char* find_value( unsigned long int key){
+	int hashIndex = key%HASH_TABLE_SIZE;
+	struct node *curr, *head;
+	// printf("find value key = %ld\n",key );
+	head = hash_table[hashIndex];
+
 	if(key == 0){
 		return ("0");
 	}
-	return(hash_table[key%HASH_TABLE_SIZE]->name);
+
+	for(curr = head; curr != NULL; curr = curr->next){
+		if(key == curr->key){
+			return curr->name;
+		}
+	}
+
+	return(NULL);
 }
-unsigned long int find_index( long int key){
+unsigned long int find_index( unsigned long int key){
+	struct node *curr, *head;
+	int hashIndex = key%HASH_TABLE_SIZE;
+
+	head = hash_table[hashIndex];
+
 	if(key == 0){
 		return (0);
 	}
-	return(hash_table[key%HASH_TABLE_SIZE]->index);
+
+	for(curr = head; curr != NULL; curr = curr->next){
+		if(key == curr->key){
+			return curr->index;
+		}
+	}
+
+	return(-1);
 }
 
-long int add_node(char *name){
+unsigned long int add_node(char *name){
 	struct node *curr;
-	unsigned int hashIndex; 
-	int check;
+	unsigned int hashIndex, key; 
+	unsigned long int check;
 
 	if(!strcmp(name, "0")) {
 	    return 0;
@@ -55,20 +82,18 @@ long int add_node(char *name){
 	if(check!= (-1)){
 		return(check);
 	}
-	hashIndex = hash(name);
+
+	key = hash(name);
+	hashIndex = key%HASH_TABLE_SIZE;
+
 	curr = (struct node *) malloc (sizeof(struct node));
 	strcpy(curr->name,name);
-	curr->key = hashIndex;
+	curr->key = key;
 	curr->index = counter;
+	curr->next = hash_table[hashIndex];
+	hash_table[hashIndex] = curr;
 
-	while(hash_table[hashIndex] != NULL){
-      ++hashIndex;
-		
-      hashIndex %= HASH_TABLE_SIZE;
-   }
-
-   	counter++;
-   	hash_table[hashIndex] = curr;      
+   	counter++;    
 	return(curr->key);
 }
 
