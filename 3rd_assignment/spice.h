@@ -19,7 +19,7 @@
 #include "Sparse/CXSparse/Include/cs.h"
 
 #define NODE_SIZE 40
-#define HASH_TABLE_SIZE 4
+#define HASH_TABLE_SIZE 2048
 
 #define SIZE_VALUE 20
 #define SIZE_NAME 20
@@ -146,9 +146,10 @@ void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_
 
 void sparse_matrix(int node_sum, int m2_elem);
 void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
-void sparse_Cholesky_analysis();
-void sparse_CG_analysis();
-void sparse_Bi_CG_analysis();
+void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
+void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
+void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
+void sparse_set_x(double *x_sparse, int node_sum, int m2_elem);
 
 /*prints to file the result of print*/
 int plot(struct element *head);

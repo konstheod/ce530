@@ -47,34 +47,39 @@ int main(int argc, char *argv[]){
 	printf("Constructs the MNA matrix and b vector\n");
 	constructor(nodes(),m2_elem(), head);
 	// print_MNA(nodes(),m2_elem());
-	if(if_cholesky){
-		printf("Computing x with Cholesky analysis \n");
-		check = Cholesky_analysis(nodes(),m2_elem());
-		if(check == -1){
-			return -1;
-		}
-	}
-	else if(if_CG){
-		printf("Computing x with CG analysis \n");
-		check = CG_analysis(nodes(),m2_elem());
-		if(check == -1){
-			return -1;
-		}
-	}
-	else if(if_Bi_CG){
-		printf("Computing x with Bi_CG analysis \n");
-		check = Bi_CG_analysis(nodes(),m2_elem());
-		if(check == -1){
-			printf("Mulfunction with Bi_CG analysis \n");
-			return -1;
-		}
+	if(if_sparse){
+		sparse_matrix(nodes(), m2_elem());
+		
 	}
 	else{
-		printf("Computing x with LU analysis \n");
-	 	LU_analysis(nodes(),m2_elem());
+		if(if_cholesky){
+			printf("Computing x with Cholesky analysis \n");
+			check = Cholesky_analysis(nodes(),m2_elem());
+			if(check == -1){
+				return -1;
+			}
+		}
+		else if(if_CG){
+			printf("Computing x with CG analysis \n");
+			check = CG_analysis(nodes(),m2_elem());
+			if(check == -1){
+				return -1;
+			}
+		}
+		else if(if_Bi_CG){
+			printf("Computing x with Bi_CG analysis \n");
+			check = Bi_CG_analysis(nodes(),m2_elem());
+			if(check == -1){
+				printf("Mulfunction with Bi_CG analysis \n");
+				return -1;
+			}
+		}
+		else{
+			printf("Computing x with LU analysis \n");
+		 	LU_analysis(nodes(),m2_elem());
+		}
 	}
 
-	sparse_matrix(nodes(), m2_elem());
 
 	print_x();
 	

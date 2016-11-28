@@ -130,16 +130,9 @@ void get_b_sparse(double *b_sparse, int node_sum, int m2_elem){
 
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem){
 
-    int j, k, limit;
+    int j, k;
 
     for(j=0; j<(node_sum+m2_elem-1); j++){
-        
-        // if( (j+1) != (node_sum+m2_elem-1) ){
-        //     limit = compressed_MNA->p[j+1];
-        // }else{
-        //     limit = compressed_MNA->nz;
-        // }
-
         for(k = compressed_MNA->p[j]; k < compressed_MNA->p[j+1]; k++){
             if(j == compressed_MNA->i[k]){
                 MNA_diag[j] = compressed_MNA->x[k];

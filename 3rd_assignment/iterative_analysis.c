@@ -172,3 +172,184 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
     gsl_matrix_free (mnaT);
     return 0;
 }
+
+void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+    int i;
+    int iter = 0;
+    double norm_r, norm_b;
+    double rho = 0;
+    double beta = 0;
+    double rho1 = 0;
+    double alpha = 0;
+
+    double *x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
+    double *b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
+    get_b_sparse(b_sparse, node_sum, m2_elem);
+
+    double *r = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *z = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *p = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *q = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *MNA_diag = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    get_diag_matrix_sparse(compressed_MNA, MNA_diag, node_sum, m2_elem);
+
+    for(i = 0; i<(node_sum+m2_elem-1); i++){
+        x_sparse[i] = 0;
+        q[i] = 0;
+        r[i] = b_sparse[i];
+    }
+
+    norm_b = gsl_blas_dnrm2(b);
+    if(fabs(norm_b) <= EPS){
+        norm_b = 1;
+    }
+    while(1){
+
+        norm_r = norm_sparse(r, node_sum, m2_elem);
+        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem)*2){
+            break;
+        }
+
+        iter++;
+
+        precondition_solver_sparse(r, z, MNA_diag, node_sum, m2_elem);
+
+        rho = inner_product_sparse(r, z, node_sum, m2_elem);
+
+        if(iter == 1) {
+            for(i = 0; i<(node_sum+m2_elem-1); i++){
+                p[i] = z[i];
+            }
+        }
+        else {
+            beta = rho/rho1;
+            
+            for(i = 0; i<(node_sum+m2_elem-1); i++){
+                p[i] = z[i] + beta*p[i];
+            }
+        }
+
+        rho1 = rho;
+        mul_vector_matrix_sparse(compressed_MNA, p, q, node_sum, m2_elem);
+
+        alpha = rho/inner_product_sparse(p, q, node_sum, m2_elem);
+
+        axpy_solve_sparse(alpha, p, x_sparse, node_sum, m2_elem);
+        axpy_solve_sparse(-alpha, q, r, node_sum, m2_elem);
+
+
+    }
+
+    sparse_set_x(x_sparse, node_sum, m2_elem);
+
+    free(r);
+    free(p);
+    free(q);
+    free(z);
+    free(MNA_diag);
+    free(b_sparse);
+    free(x_sparse);
+}
+
+
+void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+    int i;
+    int iter = 0;
+    double norm_r, norm_b;
+    double rho = 0;
+    double beta = 0;
+    double rho1 = 0;
+    double alpha = 0;
+
+    double *x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
+    double *b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
+    get_b_sparse(b_sparse, node_sum, m2_elem);
+
+    double *r = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *r1 = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *z = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *z1 = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *p = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *p1 = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *q = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *q1 = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    double *MNA_diag = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    get_diag_matrix_sparse(compressed_MNA, MNA_diag, node_sum, m2_elem);
+
+    cs_di *compressed_MNA_T = cs_di_transpose (compressed_MNA, (node_sum+m2_elem-1)*(node_sum+m2_elem-1));
+    double *MNA_diag_T = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
+    get_diag_matrix_sparse(compressed_MNA_T, MNA_diag_T, node_sum, m2_elem);
+
+    for(i = 0; i<(node_sum+m2_elem-1); i++){
+        x_sparse[i] = 0;
+        q[i] = 0;
+        q1[i] = 0;
+        r[i] = b_sparse[i];
+        r1[i] = b_sparse[i];
+    }
+
+    norm_b = gsl_blas_dnrm2(b);
+    if(fabs(norm_b) <= EPS){
+        norm_b = 1;
+    }
+    while(1){
+
+        norm_r = norm_sparse(r, node_sum, m2_elem);
+        if((norm_r/norm_b) <= itol || iter >= (node_sum+m2_elem)*2){
+            break;
+        }
+
+        iter++;
+
+        precondition_solver_sparse(r, z, MNA_diag, node_sum, m2_elem);
+        precondition_solver_sparse(r1, z1, MNA_diag, node_sum, m2_elem);
+
+        rho = inner_product_sparse(r, z, node_sum, m2_elem);
+        if(fabs(rho) < EPS){
+            return;
+        }
+
+        if(iter == 1) {
+            for(i = 0; i<(node_sum+m2_elem-1); i++){
+                p[i] = z[i];
+                p1[i] = z1[i];
+            }
+        }
+        else {
+            beta = rho/rho1;
+            
+            for(i = 0; i<(node_sum+m2_elem-1); i++){
+                p[i] = z[i] + beta*p[i];
+                p1[i] = z1[i] + beta*p1[i];
+            }
+        }
+
+        rho1 = rho;
+        mul_vector_matrix_sparse(compressed_MNA, p, q, node_sum, m2_elem);
+        mul_vector_matrix_sparse(compressed_MNA_T, p1, q1, node_sum, m2_elem);
+
+        alpha = rho/inner_product_sparse(p1, q, node_sum, m2_elem);
+
+        axpy_solve_sparse(alpha, p, x_sparse, node_sum, m2_elem);
+        axpy_solve_sparse(-alpha, q, r, node_sum, m2_elem);
+        axpy_solve_sparse(-alpha, q1, r1, node_sum, m2_elem);
+
+
+    }
+
+    sparse_set_x(x_sparse, node_sum, m2_elem);
+
+    free(r);
+    free(r1);
+    free(p);
+    free(p1);
+    free(q);
+    free(q1);
+    free(z);
+    free(z1);
+    free(MNA_diag);
+    free(MNA_diag_T);
+    free(b_sparse);
+    free(x_sparse);
+    cs_di_spfree(compressed_MNA_T);
+}
