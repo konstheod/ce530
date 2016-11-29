@@ -120,14 +120,6 @@ void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_el
     gsl_vector_free(row);
 }
 
-void get_b_sparse(double *b_sparse, int node_sum, int m2_elem){
-    int i;
-
-    for(i = 0; i < (node_sum - 1 + m2_elem); i++){
-        b_sparse[i] = gsl_vector_get(b,i);
-    }
-}
-
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem){
 
     int j, k;

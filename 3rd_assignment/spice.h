@@ -19,7 +19,7 @@
 #include "Sparse/CXSparse/Include/cs.h"
 
 #define NODE_SIZE 40
-#define HASH_TABLE_SIZE 2048
+#define HASH_TABLE_SIZE 2000
 
 #define SIZE_VALUE 20
 #define SIZE_NAME 20
@@ -63,8 +63,10 @@ struct element{
 extern struct node * hash_table[HASH_TABLE_SIZE];
 extern gsl_matrix *mna;
 extern gsl_vector *b;
-extern gsl_vector *x_help;
+extern unsigned long int *x_help;
 extern gsl_vector *x;
+extern double *b_sparse;
+extern double *x_sparse;
 
 int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else is set to 0
 int if_Bi_CG;
@@ -136,7 +138,7 @@ void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2
 void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
 void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
 
-void get_b_sparse(double *b_sparse, int node_sum, int m2_elem);
+// void get_b_sparse(double *b_sparse, int node_sum, int m2_elem);
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem);
 double norm_sparse(double *sparse, int node_sum, int m2_elem);
 void precondition_solver_sparse(double *r, double *z, double *MNA_diag, int node_sum, int m2_elem);
@@ -149,10 +151,12 @@ void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
 void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
 void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
 void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
-void sparse_set_x(double *x_sparse, int node_sum, int m2_elem);
-
+void sparse_set_x(int node_sum, int m2_elem);
+void print_MNA_sparse(int node_sum, int m2_elem);
+void free_mna_sparse();
 /*prints to file the result of print*/
 int plot(struct element *head);
+void constructor_sparse(int node_sum, int m2_elem, struct element *head);
 
 /*prints the value of x without DC*/
 void print_x(void);

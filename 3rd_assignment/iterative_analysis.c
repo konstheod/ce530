@@ -1,5 +1,8 @@
 #include "spice.h"
 
+double *b_sparse;
+double *x_sparse;
+
 int CG_analysis(int node_sum, int m2_elem){
     int i;
     int iter = 0;
@@ -182,9 +185,6 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     double rho1 = 0;
     double alpha = 0;
 
-    double *x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    double *b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    get_b_sparse(b_sparse, node_sum, m2_elem);
 
     double *r = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     double *z = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
@@ -240,15 +240,13 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 
     }
 
-    sparse_set_x(x_sparse, node_sum, m2_elem);
+    sparse_set_x(node_sum, m2_elem);
 
     free(r);
     free(p);
     free(q);
     free(z);
     free(MNA_diag);
-    free(b_sparse);
-    free(x_sparse);
 }
 
 
@@ -261,9 +259,6 @@ void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     double rho1 = 0;
     double alpha = 0;
 
-    double *x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    double *b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    get_b_sparse(b_sparse, node_sum, m2_elem);
 
     double *r = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     double *r1 = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
@@ -337,7 +332,7 @@ void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 
     }
 
-    sparse_set_x(x_sparse, node_sum, m2_elem);
+    sparse_set_x(node_sum, m2_elem);
 
     free(r);
     free(r1);
@@ -349,7 +344,5 @@ void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     free(z1);
     free(MNA_diag);
     free(MNA_diag_T);
-    free(b_sparse);
-    free(x_sparse);
     cs_di_spfree(compressed_MNA_T);
 }

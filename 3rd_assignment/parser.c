@@ -7,7 +7,7 @@ int counter_m2 = 0; //counter for elements in team2
 int index_print = 0; //counts element for plot
 
 gsl_vector *x;
-gsl_vector *x_help;
+unsigned long int *x_help;
 
 int parser(struct element **element_head, int fd){
 	int k, i, j=1, check;
@@ -1218,35 +1218,40 @@ int plot(struct element *head){
 				}
 
 				//solve the system Ax = b
-				if(if_cholesky){
-					printf("Computing x with Cholesky analysis \n");
-					check = Cholesky_analysis(nodes(),m2_elem());
-					if(check == -1){
-						return -1;
-					}
+				if(if_sparse) {
+					sparse_matrix(nodes(), m2_elem());
 				}
-				else if(if_CG){
-					printf("Computing x with CG analysis \n");
-					check = CG_analysis(nodes(),m2_elem());
-					if(check == -1){
-						return -1;
+				else {
+					if(if_cholesky){
+						printf("Computing x with Cholesky analysis \n");
+						check = Cholesky_analysis(nodes(),m2_elem());
+						if(check == -1){
+							return -1;
+						}
 					}
-				}
-				else if(if_Bi_CG){
-					printf("Computing x with Bi_CG analysis \n");
-					check = Bi_CG_analysis(nodes(),m2_elem());
-					if(check == -1){
-						return -1;
+					else if(if_CG){
+						printf("Computing x with CG analysis \n");
+						check = CG_analysis(nodes(),m2_elem());
+						if(check == -1){
+							return -1;
+						}
 					}
-				}
-				else{
-					printf("Computing x with LU analysis \n");
-				 	LU_analysis(nodes(),m2_elem());
+					else if(if_Bi_CG){
+						printf("Computing x with Bi_CG analysis \n");
+						check = Bi_CG_analysis(nodes(),m2_elem());
+						if(check == -1){
+							return -1;
+						}
+					}
+					else{
+						printf("Computing x with LU analysis \n");
+					 	LU_analysis(nodes(),m2_elem());
+					}
 				}
 
 				//find the node you want to print
 				for(k=0; k<(nodes()-1); k++){
-					if(gsl_vector_get(x_help,k) == if_print[i]){
+					if(x_help[k] == if_print[i]){
 
 						//write the results to file
 						sprintf(curr_write,"%c", curr->type);

@@ -5,7 +5,7 @@ struct node * hash_table[HASH_TABLE_SIZE];
 gsl_matrix *mna;
 gsl_vector *b;
 gsl_vector *x;
-gsl_vector *x_help;
+unsigned long int *x_help;
 
 int main(int argc, char *argv[]){
 	int fd;
@@ -42,16 +42,21 @@ int main(int argc, char *argv[]){
 	printf("Parsing the %s\n",file_name);
 	parser(&head, fd);
 	
-	printList(head);
-	// make mna
-	printf("Constructs the MNA matrix and b vector\n");
-	constructor(nodes(),m2_elem(), head);
-	// print_MNA(nodes(),m2_elem());
+	// printList(head);
+	
 	if(if_sparse){
+		constructor_sparse(nodes(), m2_elem(), head);
+		// print_MNA_sparse(node_sum, m2_elem);
 		sparse_matrix(nodes(), m2_elem());
-		
+		free_mna_sparse();
 	}
 	else{
+		printf("aaaaa111111111\n");
+
+		// make mna
+		printf("Constructs the MNA matrix and b vector\n");
+		constructor(nodes(),m2_elem(), head);
+		print_MNA(nodes(),m2_elem());
 		if(if_cholesky){
 			printf("Computing x with Cholesky analysis \n");
 			check = Cholesky_analysis(nodes(),m2_elem());
@@ -78,18 +83,20 @@ int main(int argc, char *argv[]){
 			printf("Computing x with LU analysis \n");
 		 	LU_analysis(nodes(),m2_elem());
 		}
+		free_mna();
 	}
 
 
-	print_x();
+	// print_x();
 	
 	//handles PRINT|PLOT if exist in netlist
-	plot(head);
+	// plot(head);
 
 	//free the structurs
-	free_mna();
+	
 	free_elements(&head);
 	free_nodes(hash_table);
+
 
 		
 	//close file
@@ -128,56 +135,96 @@ void print_x(){
 			break;
 		}
 	}
-	if(if_cholesky){
-		check = write(fd_dc, "Cholesky_analysis\n", strlen("Cholesky_analysis\n"));
-	}
-	else if(if_CG){
-		check = write(fd_dc, "CG_analysis\n", strlen("CG_analysis\n"));
-	}
-	else if(if_Bi_CG){
-		check = write(fd_dc, "Bi_CG_analysis\n", strlen("Bi_CG_analysis\n"));
-	}
-	else{
-		check = write(fd_dc, "LU_analysis\n", strlen("LU_analysis\n"));
-	}
-	if(check<0){
-		perror("write");
-		return;
-	}
-	check = write(fd_dc, "\nV(0) = 0.000000 Volt\n\n", strlen("\nV(0) = 0.000000 Volt\n\n"));
-	if(check<0){
-		perror("write");
-		return;
-	}
+	// if(if_cholesky){
+	// 	check = write(fd_dc, "Cholesky_analysis\n", strlen("Cholesky_analysis\n"));
+	// }
+	// else if(if_CG){
+	// 	check = write(fd_dc, "CG_analysis\n", strlen("CG_analysis\n"));
+	// }
+	// else if(if_Bi_CG){
+	// 	check = write(fd_dc, "Bi_CG_analysis\n", strlen("Bi_CG_analysis\n"));
+	// }
+	// else{
+	// 	check = write(fd_dc, "LU_analysis\n", strlen("LU_analysis\n"));
+	// }
+	// if(check<0){
+	// 	perror("write");
+	// 	return;
+	// }
+	// check = write(fd_dc, "\nV(0) = 0.000000 Volt\n\n", strlen("\nV(0) = 0.000000 Volt\n\n"));
+	// if(check<0){
+	// 	perror("write");
+	// 	return;
+	// }
 
-	for(i = 0; i< nodes() + m2_elem() - 1; i++){
-		check = write(fd_dc, "x(", strlen("V("));
-		if(check<0){
-			perror("write");
-			return;
-		}
-		sprintf(curr_write,"%d", i+1);
-		check = write(fd_dc, curr_write, strlen(curr_write));
-		if(check<0){
-			perror("write");
-			return;
-		}
-		check = write(fd_dc, ") = ", strlen(") = "));
-		if(check<0){
-			perror("write");
-			return;
-		}
-		sprintf(curr_write,"%lf", gsl_vector_get(x,i));
-		check = write(fd_dc, curr_write, strlen(curr_write));
-		if(check<0){
-			perror("write");
-			return;
-		}
-		check = write(fd_dc, " Volt\n", strlen(" Volt\n"));
-		if(check<0){
-			perror("write");
-			return;
-		}
+	// for(i = 0; i< nodes() + m2_elem() - 1; i++){
+	// 	check = write(fd_dc, "x(", strlen("V("));
+	// 	if(check<0){
+	// 		perror("write");
+	// 		return;
+	// 	}
+	// 	sprintf(curr_write,"%d", i+1);
+	// 	check = write(fd_dc, curr_write, strlen(curr_write));
+	// 	if(check<0){
+	// 		perror("write");
+	// 		return;
+	// 	}
+	// 	check = write(fd_dc, ") = ", strlen(") = "));
+	// 	if(check<0){
+	// 		perror("write");
+	// 		return;
+	// 	}
+	// 	sprintf(curr_write,"%lf", gsl_vector_get(x,i));
+	// 	check = write(fd_dc, curr_write, strlen(curr_write));
+	// 	if(check<0){
+	// 		perror("write");
+	// 		return;
+	// 	}
+	// 	check = write(fd_dc, " Volt\n", strlen(" Volt\n"));
+	// 	if(check<0){
+	// 		perror("write");
+	// 		return;
+	// 	}
+	// }
+
+	for(i = 0; i< (nodes() - 1); i++){
+ 		// check = write(fd_dc, "V(", strlen("V("));
+ 		// if(check<0){
+ 		// 	perror("write");
+ 		// 	return;
+ 		// }
+ 		sprintf(curr_write,"%s", find_value(x_help[i]));
+ 		check = write(fd_dc, find_value(x_help[i]), strlen(find_value(x_help[i])));
+ 		if(check<0){
+ 			perror("write");
+ 			return;
+ 		}
+ 		// check = write(fd_dc, ") = ", strlen(") = "));
+ 		// if(check<0){
+ 		// 	perror("write");
+ 		// 	return;
+ 		// }
+ 		check = write(fd_dc, "  ", strlen("  "));
+ 		if(check<0){
+ 			perror("write");
+ 			return;
+ 		}
+ 		sprintf(curr_write,"%.5e", gsl_vector_get(x,i));
+ 		check = write(fd_dc, curr_write, strlen(curr_write));
+ 		if(check<0){
+ 			perror("write");
+ 			return;
+ 		}
+ 		// check = write(fd_dc, " Volt\n", strlen(" Volt\n"));
+ 		// if(check<0){
+ 		// 	perror("write");
+ 		// 	return;
+ 		// }
+ 		check = write(fd_dc, "\n", strlen("\n"));
+ 		if(check<0){
+ 			perror("write");
+ 			return;
+ 		}
 	}
 
 	close(fd_dc);

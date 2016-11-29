@@ -72,7 +72,8 @@ unsigned long int find_index( unsigned long int key){
 
 unsigned long int add_node(char *name){
 	struct node *curr;
-	unsigned int hashIndex, key; 
+	unsigned int hashIndex;
+	unsigned long int key; 
 	unsigned long int check;
 
 	if(!strcmp(name, "0")) {

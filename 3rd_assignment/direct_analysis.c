@@ -1,5 +1,7 @@
 #include "spice.h"
 
+double *b_sparse;
+double *x_sparse;
 
 int LU_analysis(int node_sum,int m2_elem){
     int s, i, j;
@@ -63,26 +65,20 @@ void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     S = NULL;
     N = NULL;
 
-    double *b_sparse, *x_sparse;
-
     S = cs_di_sqr(2, compressed_MNA, 0);
     N = cs_di_lu(compressed_MNA, S, 1);
 
-    x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    get_b_sparse(b_sparse, node_sum, m2_elem);
+
 
     cs_di_ipvec(N->pinv, b_sparse, x_sparse, node_sum - 1 + m2_elem);
     cs_di_lsolve(N->L, x_sparse);
     cs_di_usolve(N->U, x_sparse);
     cs_di_ipvec(S->q, x_sparse, b_sparse, node_sum - 1 + m2_elem);
 
-    sparse_set_x(x_sparse, node_sum, m2_elem);
+    sparse_set_x(node_sum, m2_elem);
 
     cs_di_sfree(S);
     cs_di_nfree(N);
-    free(x_sparse);
-    free(b_sparse);
 }
 
 void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
@@ -91,15 +87,9 @@ void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 
     S = NULL;
     N = NULL;
-
-    double *b_sparse, *x_sparse;
     
     S = cs_di_schol(1, compressed_MNA);
     N = cs_di_chol(compressed_MNA, S);
-
-    x_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    b_sparse = (double *) malloc((node_sum - 1 + m2_elem)*sizeof(double));
-    get_b_sparse(b_sparse, node_sum, m2_elem);
 
 
     cs_di_ipvec(S->pinv, b_sparse, x_sparse, node_sum - 1 + m2_elem);
@@ -107,10 +97,8 @@ void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     cs_di_ltsolve(N->L, x_sparse);
     cs_di_pvec(S->pinv, x_sparse, b_sparse, node_sum - 1 + m2_elem);
 
-    sparse_set_x(x_sparse, node_sum, m2_elem);
+    sparse_set_x(node_sum, m2_elem);
 
     cs_di_sfree(S);
     cs_di_nfree(N);
-    free(x_sparse);
-    free(b_sparse);
 }
