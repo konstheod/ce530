@@ -68,6 +68,8 @@ extern gsl_vector *x;
 extern double *b_sparse;
 extern double *x_sparse;
 extern int non_zeros;
+extern cs_di *compressed_MNA;
+
 
 int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else is set to 0
 int if_Bi_CG;
@@ -148,13 +150,15 @@ void mul_vector_matrix_sparse(cs_di *compressed_MNA, double *x, double *y, int n
 void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_elem);
 
 void sparse_matrix(int node_sum, int m2_elem);
-void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
-void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
-void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
-void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem);
+void sparse_LU_analysis(int node_sum, int m2_elem);
+void sparse_Cholesky_analysis(int node_sum, int m2_elem);
+void sparse_CG_analysis(int node_sum, int m2_elem);
+void sparse_Bi_CG_analysis(int node_sum, int m2_elem);
 void sparse_set_x(int node_sum, int m2_elem);
 void print_MNA_sparse(int node_sum, int m2_elem);
 void free_mna_sparse();
+int MNA_voltage_dc_sparse(struct element *vol,double value, int node_sum);
+int MNA_power_dc_sparse(struct element *power, double value, double old_value);
 /*prints to file the result of print*/
 int plot(struct element *head);
 void constructor_sparse(int node_sum, int m2_elem, struct element *head);

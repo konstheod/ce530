@@ -18,7 +18,7 @@ void MNA_init(int node_sum, int m2_elem){
 
     x_help = (unsigned long int *)malloc(sizeof(unsigned long int)*(node_sum+m2_elem-1));
 
-    x = gsl_vector_alloc ((node_sum+m2_elem-1));
+    x = gsl_vector_calloc(node_sum+m2_elem-1);
 
 
 }

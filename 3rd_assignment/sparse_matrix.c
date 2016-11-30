@@ -5,22 +5,22 @@ double *x_sparse;
 unsigned long int *x_help;
 int vol_counter_sparse = 0;
 int non_zeros;
+cs_di *compressed_MNA;
 
 void MNA_init_sparse(int node_sum, int m2_elem){
-    int i,j;
+    int i;
     //calloc ston pinaka mna    
-    printf("non_zeros = %d, size = %lu\n",non_zeros, (node_sum+m2_elem-1)*(node_sum+m2_elem-1));
+    // printf("non_zeros = %d, size = %lu\n",non_zeros, (node_sum+m2_elem-1)*(node_sum+m2_elem-1));
     sparse_MNA = cs_di_spalloc( (node_sum+m2_elem-1), (node_sum+m2_elem-1), non_zeros, 1, 1);
-    for(i=0; i<(node_sum+m2_elem-1); i++){
-        for(j=0; j<(node_sum+m2_elem-1); j++){
-            // cs_di_entry (sparse_MNA, i, j, 0.0);
-        }
-
-    }
+    
     //calloc sto dianusma b
-    b_sparse = (double *)calloc((node_sum+m2_elem-1), sizeof(double));
-    x_sparse = (double *)calloc((node_sum+m2_elem-1), sizeof(double));
-    x = gsl_vector_alloc ((node_sum+m2_elem-1));
+    b_sparse = (double *)malloc((node_sum+m2_elem-1)*sizeof(double));
+    x_sparse = (double *)malloc((node_sum+m2_elem-1)*sizeof(double));
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+       b_sparse[i] = 0.0;
+       x_sparse[i] = 0.0;
+    }
+    x = gsl_vector_calloc ((node_sum+m2_elem-1));
 
     x_help = (unsigned long int *)malloc(sizeof(unsigned long int)*(node_sum+m2_elem-1));
 }
@@ -31,12 +31,16 @@ int MNA_conductance_sparse(struct element *cont, int node_sum, int m2_elem){
     
     //pairnoume thn timh ths adistashs kai th metatrepoume se agwgimothta gia na thn prosthesoume ston pinaka
     value = cont->value;
-    value = 1/value;
+    if(value == 0){
+        value = 0.0;
+    }
+    else {
+        value = 1/value;
+    }
     
     //pairnoume tous komvous tou stoixeiou mesa apo to hash_table wste na topothethsoume to value sth swsth thesh ston pinaka
     pos = find_index(cont->pos);
     neg = find_index(cont->neg);
-    
     //an kapoios komvos einai geiwsh tote vazoume t value mono sto diagwnio
     if(pos == 0){
         cs_di_entry (sparse_MNA, neg-1, neg-1,  value);
@@ -45,26 +49,27 @@ int MNA_conductance_sparse(struct element *cont, int node_sum, int m2_elem){
         x_help[neg-1] = cont->neg;
         return(1);
     }
-    if(neg == 0){
+    if(neg == 0 ){
         cs_di_entry (sparse_MNA, pos-1, pos-1,  value);
     //        gsl_matrix_set (mna, (pos-1), (pos-1), gsl_matrix_get(mna, (pos-1), (pos-1)) + value);
         x_help[pos-1] = cont->pos;
         return(1);
     }
-    
     //anathesh timwn ston pinaka otan kanenas komvos den einai geiwsh   
-    cs_di_entry (sparse_MNA, neg-1, neg-1,  value);
     //    gsl_matrix_set (mna, (neg-1), (neg-1), gsl_matrix_get(mna, (neg-1), (neg-1)) + value);
 
     cs_di_entry (sparse_MNA, pos-1, pos-1,  value);
     //    gsl_matrix_set (mna, (pos-1), (pos-1), gsl_matrix_get(mna, (pos-1), (pos-1)) + value);
 
+    //if(value!=0){
+    cs_di_entry (sparse_MNA, neg-1, neg-1,  value);
+    cs_di_entry (sparse_MNA, pos-1, neg-1,   -value);
+        //gsl_matrix_set (mna, (pos-1), (neg-1), gsl_matrix_get(mna, (pos-1), (neg-1)) - value);
+        
+    cs_di_entry (sparse_MNA, neg-1, pos-1,   -value);
+        //gsl_matrix_set (mna, (neg-1), (pos-1), gsl_matrix_get(mna, (neg-1), (pos-1)) - value);
 
-    cs_di_entry (sparse_MNA, pos-1, neg-1,   - value);
-    //gsl_matrix_set (mna, (pos-1), (neg-1), gsl_matrix_get(mna, (pos-1), (neg-1)) - value);
-    
-    cs_di_entry (sparse_MNA, neg-1, pos-1,   - value);
-    //gsl_matrix_set (mna, (neg-1), (pos-1), gsl_matrix_get(mna, (neg-1), (pos-1)) - value);
+   // }
 
     x_help[neg-1] = cont->neg;    
     x_help[pos-1] = cont->pos;    
@@ -98,9 +103,11 @@ int MNA_power_sparse(struct element *power){
 
     b_sparse[neg-1] += value;
     // gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
-    
-    b_sparse[pos-1] -= value;
+    if(value != 0){
+        b_sparse[pos-1] -= value;
+    }
     // gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
+
 
     x_help[neg-1] = power->neg;
     x_help[pos-1] = power->pos;
@@ -149,16 +156,18 @@ int MNA_voltage_sparse(struct element *vol, int node_sum, int m2_elem){
     double value;
     
     value = vol->value;
+
     
     //prosthiki sto dianusma b
     pos = find_index(vol->pos);
     neg = find_index(vol->neg); 
     
     if(vol->type == 'L'){
-       value = 0;
+       value = 0.0;
     }
-    
-    b_sparse[node_sum - 1 + vol_counter_sparse] += value;
+    if(value!=0.0){
+        b_sparse[node_sum - 1 + vol_counter_sparse] += value;
+    }
     //gsl_vector_set(b,(node_sum - 1 + vol_counter_sparse),value);
     x_help[node_sum - 1 + vol_counter_sparse] = 0;
     
@@ -236,8 +245,10 @@ void print_MNA_sparse(int node_sum, int m2_elem){
 void constructor_sparse(int node_sum, int m2_elem, struct element *head){
     MNA_init_sparse(node_sum, m2_elem);
     struct element *curr;
+    int i = 0;
 
     for(curr = head; curr != NULL; curr = curr->next){
+        // printf("next_element %d\n",i);
         if(curr->type == 'R'){
             MNA_conductance_sparse(curr, node_sum, m2_elem);
         }
@@ -247,52 +258,49 @@ void constructor_sparse(int node_sum, int m2_elem, struct element *head){
         else if(curr->type == 'V' || curr->type == 'L') {
             MNA_voltage_sparse(curr, node_sum, m2_elem);
         }
+        i++;
     }
+    compressed_MNA = cs_di_compress(sparse_MNA);
+    cs_di_spfree(sparse_MNA);
+    cs_di_dupl(compressed_MNA);
 }
 
 
 void sparse_matrix(int node_sum, int m2_elem){
-    cs_di *compressed_MNA;
-    // int new_non_zeroes = 0;
-    // int i;
 
-    // for(i = 0; i < non_zeros; i++){
-    //     if(sparse_MNA->x[i]!=0.0){
-    //         new_non_zeroes++;
-    //     }
-    // }
-    //non_zeros = new_non_zeroes;
-    //sparse_MNA->nz = non_zeros;
-
-    compressed_MNA = cs_di_compress(sparse_MNA);
-
-    cs_di_spfree(sparse_MNA);
-    cs_di_dupl(compressed_MNA);
-    // cs_di_print (compressed_MNA,0);
     if(if_cholesky){
      printf("Computing x with Cholesky analysis \n");
-     sparse_Cholesky_analysis(compressed_MNA, node_sum, m2_elem);
+     sparse_Cholesky_analysis(node_sum, m2_elem);
     }
     else if(if_CG){
      printf("Computing x with CG analysis \n");
-     sparse_CG_analysis(compressed_MNA, node_sum, m2_elem);
+     sparse_CG_analysis(node_sum, m2_elem);
         
     }
     else if(if_Bi_CG){
      printf("Computing x with Bi_CG analysis \n");
-     sparse_Bi_CG_analysis(compressed_MNA, node_sum, m2_elem);
+     sparse_Bi_CG_analysis(node_sum, m2_elem);
     }
     else{
      printf("Computing x with LU analysis \n");
-     sparse_LU_analysis(compressed_MNA, node_sum, m2_elem);
+     sparse_LU_analysis(node_sum, m2_elem);
     }
 
-    cs_di_spfree(compressed_MNA);
+    //cs_di_spfree(compressed_MNA);
 }
 
 void sparse_set_x(int node_sum, int m2_elem){
     int i;
+    // printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
     for(i = 0; i < (node_sum - 1 + m2_elem); i++){
-        gsl_vector_set(x, i, x_sparse[i]);
+        // printf("sd %lf\n", x_sparse[i]);
+        // if(x_sparse[i] < EPS){
+
+        //     gsl_vector_set(x, i,0.0000000000);
+        // }
+        // else{
+            gsl_vector_set(x, i, x_sparse[i]);
+        // }
+        // printf("%g\n",gsl_vector_get(x, i));
     }
 }

@@ -3,6 +3,7 @@
 double *b_sparse;
 double *x_sparse;
 int non_zeros;
+cs_di *compressed_MNA;
 
 int LU_analysis(int node_sum,int m2_elem){
     int s, i, j;
@@ -59,10 +60,11 @@ int Cholesky_analysis(int node_sum,int m2_elem){
     return (0);
 }
 
-void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+void sparse_LU_analysis(int node_sum, int m2_elem){
     double *vector_temp = NULL;
     cs_dis *S;
     cs_din *N;
+    int i;
 
     S = NULL;
     N = NULL;
@@ -83,12 +85,16 @@ void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     printf("aaaaa\n");
     cs_di_ipvec( S->q, vector_temp, x_sparse, node_sum - 1 + m2_elem );
     printf("aaaaa\n");
-*/
+*/  
     cs_di_ipvec(N->pinv, vector_temp, x_sparse, node_sum - 1 + m2_elem);
+   
     cs_di_lsolve(N->L, x_sparse);
     cs_di_usolve(N->U, x_sparse);
     cs_di_ipvec(S->q, x_sparse, vector_temp, node_sum - 1 + m2_elem);
-    memcpy( x_sparse, vector_temp, (node_sum - 1 + m2_elem) * sizeof(double) );
+    for(i = 0; i< (node_sum + m2_elem - 1); i++){
+        x_sparse[i] = vector_temp[i];
+    }
+    //memcpy( x_sparse, vector_temp, (node_sum - 1 + m2_elem) * sizeof(double) );
     sparse_set_x(node_sum, m2_elem);
 
     free(vector_temp);
@@ -96,7 +102,7 @@ void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     cs_di_nfree(N);
 }
 
-void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+void sparse_Cholesky_analysis(int node_sum, int m2_elem){
     double *vector_temp = NULL;
     cs_dis *S;
     cs_din *N;
@@ -106,18 +112,24 @@ void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 
     vector_temp = ( double * ) calloc( node_sum - 1 + m2_elem, sizeof(double) );
     memcpy( vector_temp, b_sparse, (node_sum - 1 + m2_elem) * sizeof(double) );
-    
+    // cs_di_print (compressed_MNA,0);
     S = cs_di_schol(1, compressed_MNA);
     N = cs_di_chol(compressed_MNA, S);
-
-
+    if(N==NULL){
+        cs_di_sfree(S);
+        cs_di_nfree(N);
+        printf("IS NOT SPD\n");
+        exit(1);
+    }
     cs_di_ipvec(S->pinv, vector_temp, x_sparse, node_sum - 1 + m2_elem);
     cs_di_lsolve(N->L, x_sparse);
     cs_di_ltsolve(N->L, x_sparse);
     cs_di_pvec(S->pinv, x_sparse, vector_temp, node_sum - 1 + m2_elem);
     memcpy( x_sparse, vector_temp, (node_sum - 1 + m2_elem) * sizeof(double) );
     sparse_set_x(node_sum, m2_elem);
+    // cs_di_print (compressed_MNA,0);
 
+    free(vector_temp);
     cs_di_sfree(S);
     cs_di_nfree(N);
 }

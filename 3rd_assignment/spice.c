@@ -45,18 +45,22 @@ int main(int argc, char *argv[]){
 	// printList(head);
 	
 	if(if_sparse){
+		printf("Constructs the MNA matrix and b vector\n");
 		constructor_sparse(nodes(), m2_elem(), head);
 		// print_MNA_sparse(nodes(), m2_elem());
 		sparse_matrix(nodes(), m2_elem());
-		print_x();
+		print_x();	
+		plot(head);	
 		free_mna_sparse();
+
+		cs_di_spfree(compressed_MNA);
 	}
 	else{
 
 		// make mna
 		printf("Constructs the MNA matrix and b vector\n");
 		constructor(nodes(),m2_elem(), head);
-		print_MNA(nodes(),m2_elem());
+		// print_MNA(nodes(),m2_elem());
 		if(if_cholesky){
 			printf("Computing x with Cholesky analysis \n");
 			check = Cholesky_analysis(nodes(),m2_elem());
@@ -84,16 +88,15 @@ int main(int argc, char *argv[]){
 		 	LU_analysis(nodes(),m2_elem());
 		}
 		print_x();
+		//handles PRINT|PLOT if exist in netlist
+		plot(head);	
 		free_mna();
 	}
 
 
 	
-	//handles PRINT|PLOT if exist in netlist
-	// plot(head);
 
 	//free the structurs
-	
 	free_elements(&head);
 	free_nodes(hash_table);
 
@@ -226,6 +229,8 @@ void print_x(){
  			return;
  		}
 	}
+
+	
 
 	close(fd_dc);
 }

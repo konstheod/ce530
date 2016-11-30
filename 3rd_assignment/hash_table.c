@@ -53,13 +53,13 @@ char* find_value( unsigned long int key){
 }
 unsigned long int find_index( unsigned long int key){
 	struct node *curr, *head;
-	int hashIndex = key%HASH_TABLE_SIZE;
-
-	head = hash_table[hashIndex];
 
 	if(key == 0){
 		return (0);
 	}
+	int hashIndex = key%HASH_TABLE_SIZE;
+
+	head = hash_table[hashIndex];
 
 	for(curr = head; curr != NULL; curr = curr->next){
 		if(key == curr->key){

@@ -3,6 +3,7 @@
 double *b_sparse;
 double *x_sparse;
 int non_zeros;
+cs_di *compressed_MNA;
 
 
 int CG_analysis(int node_sum, int m2_elem){
@@ -178,7 +179,7 @@ int Bi_CG_analysis(int node_sum, int m2_elem){
     return 0;
 }
 
-void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+void sparse_CG_analysis(int node_sum, int m2_elem){
     int i;
     int iter = 0;
     double norm_r, norm_b;
@@ -187,6 +188,21 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     double rho1 = 0;
     double alpha = 0;
 
+    cs_dis *S;
+    cs_din *N;
+    S = NULL;
+    N = NULL;
+    S = cs_di_schol(1, compressed_MNA);
+    N = cs_di_chol(compressed_MNA, S);
+    if(N==NULL){
+        cs_di_sfree(S);
+        cs_di_nfree(N);
+        printf("IS NOT SPD\n");
+        exit(1);
+    }else{
+        cs_di_sfree(S);
+        cs_di_nfree(N);
+    }
 
     double *r = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     double *z = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
@@ -253,7 +269,7 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
 }
 
 
-void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+void sparse_Bi_CG_analysis(int node_sum, int m2_elem){
     int i;
     int iter = 0;
     double norm_r, norm_b;

@@ -12,7 +12,7 @@ unsigned long int *x_help;
 int parser(struct element **element_head, int fd){
 	int k, i, j=1, check;
 	char el_type, name[SIZE_NAME];
-	char curr_value[SIZE_VALUE], input[100], curr_area[SIZE_VALUE];
+	char curr_value[SIZE_VALUE], input[1000], curr_area[SIZE_VALUE];
 	char node_name[NODE_SIZE];	
 	struct element *head, *curr, *tail, *dc_curr;
 	head = *element_head;
@@ -26,7 +26,7 @@ int parser(struct element **element_head, int fd){
 	if_sparse = 0;
 
 	while(1){
-		check = read(fd, input, 100);
+		check = read(fd, input, 1000);
 		
 		if(check<0){
 			printf("Problem with read\n");
@@ -46,7 +46,7 @@ int parser(struct element **element_head, int fd){
 				while(i<check && input[i]!='\n'){
 					i++;
 					if(check==i){
-						check = read(fd, input, 100);
+						check = read(fd, input, 1000);
 		
 						if(check<0){
 							printf("Problem with read\n");
@@ -66,7 +66,7 @@ int parser(struct element **element_head, int fd){
 				i++;
 
 				if(check==i){
-					check = read(fd, input, 100);
+					check = read(fd, input, 1000);
 	
 					if(check<0){
 						printf("Problem with read\n");
@@ -80,7 +80,7 @@ int parser(struct element **element_head, int fd){
 					for(k = 0; k<2; k++){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 			
 							if(check<0){
 								printf("Problem with read\n");
@@ -93,7 +93,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -106,7 +106,7 @@ int parser(struct element **element_head, int fd){
 					el_type = toupper(el_type);
 					i++;
 					if(check==i){
-						check = read(fd, input, 100);
+						check = read(fd, input, 1000);
 						if(check<0){
 							printf("Problem with read\n");
 							close(fd);
@@ -123,7 +123,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -137,7 +137,7 @@ int parser(struct element **element_head, int fd){
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -157,7 +157,7 @@ int parser(struct element **element_head, int fd){
 								k++;
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -172,7 +172,7 @@ int parser(struct element **element_head, int fd){
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -191,7 +191,7 @@ int parser(struct element **element_head, int fd){
 								k++;
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -206,7 +206,7 @@ int parser(struct element **element_head, int fd){
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -225,7 +225,7 @@ int parser(struct element **element_head, int fd){
 								k++;
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -246,7 +246,7 @@ int parser(struct element **element_head, int fd){
 
 					i++;
 					if(check==i){
-						check = read(fd, input, 100);
+						check = read(fd, input, 1000);
 		
 						if(check<0){
 							printf("Problem with read\n");
@@ -262,7 +262,7 @@ int parser(struct element **element_head, int fd){
 					for(k = 0; k<str_size; k++){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 			
 							if(check<0){
 								printf("Problem with read\n");
@@ -276,7 +276,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -288,7 +288,7 @@ int parser(struct element **element_head, int fd){
 						if(input[i] == 'V'){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -299,7 +299,7 @@ int parser(struct element **element_head, int fd){
 							if(input[i] == '('){
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -317,7 +317,7 @@ int parser(struct element **element_head, int fd){
 									i++;
 									
 									if(check==i){
-										check = read(fd, input, 100);
+										check = read(fd, input, 1000);
 										if(check<0){
 											printf("Problem with read\n");
 											close(fd);
@@ -339,7 +339,7 @@ int parser(struct element **element_head, int fd){
 								while(input[i] == '\t' || input[i] == ' ' || input[i]==')'){
 									i++;
 									if(check==i){
-										check = read(fd, input, 100);
+										check = read(fd, input, 1000);
 										if(check<0){
 											printf("Problem with read\n");
 											close(fd);
@@ -359,7 +359,7 @@ int parser(struct element **element_head, int fd){
 					for(k = 0; k<7; k++){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 			
 							if(check<0){
 								printf("Problem with read\n");
@@ -372,7 +372,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -390,7 +390,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -404,7 +404,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -422,7 +422,7 @@ int parser(struct element **element_head, int fd){
 							k++;
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -436,7 +436,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -454,7 +454,7 @@ int parser(struct element **element_head, int fd){
 							k++;
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -475,7 +475,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -493,7 +493,7 @@ int parser(struct element **element_head, int fd){
 							k++;
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -513,7 +513,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' ' || input[i] == '='){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -531,7 +531,7 @@ int parser(struct element **element_head, int fd){
 							k++;
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -584,7 +584,7 @@ int parser(struct element **element_head, int fd){
 					}
 					i++;
 					if(check==i){
-						check = read(fd, input, 100);
+						check = read(fd, input, 1000);
 		
 						if(check<0){
 							printf("Problem with read\n");
@@ -604,7 +604,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -617,7 +617,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -638,7 +638,7 @@ int parser(struct element **element_head, int fd){
 						i++;
 						
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -652,7 +652,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -673,7 +673,7 @@ int parser(struct element **element_head, int fd){
 						i++;
 						
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -687,7 +687,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -704,7 +704,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -715,6 +715,9 @@ int parser(struct element **element_head, int fd){
 					}
 
 					curr->value = atof(curr_value);
+					if(curr->value == 0 && (curr->neg== '0' || curr->pos== '0')){
+						curr->type = 'L';
+					}
 					curr->dc = 0;
 					continue;
 
@@ -724,7 +727,7 @@ int parser(struct element **element_head, int fd){
 					curr->type = input[i];
 					i++;
 					if(check==i){
-						check = read(fd, input, 100);
+						check = read(fd, input, 1000);
 		
 						if(check<0){
 							printf("Problem with read\n");
@@ -745,7 +748,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -757,7 +760,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -778,7 +781,7 @@ int parser(struct element **element_head, int fd){
 						i++;
 						
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -802,7 +805,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -823,7 +826,7 @@ int parser(struct element **element_head, int fd){
 						i++;
 						
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -849,7 +852,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -870,7 +873,7 @@ int parser(struct element **element_head, int fd){
 							i++;
 							
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -888,7 +891,7 @@ int parser(struct element **element_head, int fd){
 							while(input[i] == '\t' || input[i] == ' '){
 								i++;
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -909,7 +912,7 @@ int parser(struct element **element_head, int fd){
 								i++;
 								
 								if(check==i){
-									check = read(fd, input, 100);
+									check = read(fd, input, 1000);
 									if(check<0){
 										printf("Problem with read\n");
 										close(fd);
@@ -928,7 +931,7 @@ int parser(struct element **element_head, int fd){
 					while(input[i] == '\t' || input[i] == ' '){
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -945,7 +948,7 @@ int parser(struct element **element_head, int fd){
 						k++;
 						i++;
 						if(check==i){
-							check = read(fd, input, 100);
+							check = read(fd, input, 1000);
 							if(check<0){
 								printf("Problem with read\n");
 								close(fd);
@@ -960,7 +963,7 @@ int parser(struct element **element_head, int fd){
 						while(input[i] == '\t' || input[i] == ' '){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -979,7 +982,7 @@ int parser(struct element **element_head, int fd){
 							curr_area[k] = input[i];
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -1002,7 +1005,7 @@ int parser(struct element **element_head, int fd){
 						while(!isdigit(input[i])){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -1022,7 +1025,7 @@ int parser(struct element **element_head, int fd){
 							curr_value[k] = input[i];
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -1038,7 +1041,7 @@ int parser(struct element **element_head, int fd){
 						while(!isdigit(input[i])){
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -1058,7 +1061,7 @@ int parser(struct element **element_head, int fd){
 							curr_value[k] = input[i];
 							i++;
 							if(check==i){
-								check = read(fd, input, 100);
+								check = read(fd, input, 1000);
 								if(check<0){
 									printf("Problem with read\n");
 									close(fd);
@@ -1210,23 +1213,35 @@ int plot(struct element *head){
 			//make new b for each value of dc voltage source and print the result to file
 			while(t < lim + 1){
 				//construct b
-				if(curr->type == 'V'){
-					MNA_voltage_dc(curr, j, nodes());
-				}
-				else if(curr->type == 'I'){
-					if(j>curr->start_value){
-						MNA_power_dc(curr, j, j-curr->increment);
-					}
-					else{
-						MNA_power_dc(curr, j, curr->value);
-					}
-				}
 
 				//solve the system Ax = b
+
 				if(if_sparse) {
+					if(curr->type == 'V'){
+						MNA_voltage_dc_sparse(curr, j, nodes());
+					}
+					else if(curr->type == 'I'){
+						if(j>curr->start_value){
+							MNA_power_dc_sparse(curr, j, j-curr->increment);
+						}
+						else{
+							MNA_power_dc_sparse(curr, j, curr->value);
+						}
+					}
 					sparse_matrix(nodes(), m2_elem());
 				}
 				else {
+					if(curr->type == 'V'){
+						MNA_voltage_dc(curr, j, nodes());
+					}
+					else if(curr->type == 'I'){
+						if(j>curr->start_value){
+							MNA_power_dc(curr, j, j-curr->increment);
+						}
+						else{
+							MNA_power_dc(curr, j, curr->value);
+						}
+					}
 					if(if_cholesky){
 						printf("Computing x with Cholesky analysis \n");
 						check = Cholesky_analysis(nodes(),m2_elem());
@@ -1331,11 +1346,22 @@ int plot(struct element *head){
 				t++;
 				j += curr->increment;
 			}
-			if(curr->type == 'V'){
-				MNA_voltage_dc(curr, curr->value, nodes());
+			if(if_sparse){
+				if(curr->type == 'V'){
+					MNA_voltage_dc_sparse(curr, curr->value, nodes());
+				}
+				else if(curr->type == 'I'){
+					MNA_power_dc_sparse(curr, curr->value, curr->end_value);
+				}
 			}
-			else if(curr->type == 'I'){
-				MNA_power_dc(curr, curr->value, curr->end_value);
+			else
+			{
+				if(curr->type == 'V'){
+					MNA_voltage_dc(curr, curr->value, nodes());
+				}
+				else if(curr->type == 'I'){
+					MNA_power_dc(curr, curr->value, curr->end_value);
+				}
 			}
 			close(fd);
 		}
