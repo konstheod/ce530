@@ -2,6 +2,7 @@
 
 double *b_sparse;
 double *x_sparse;
+int non_zeros;
 
 int LU_analysis(int node_sum,int m2_elem){
     int s, i, j;
@@ -59,44 +60,62 @@ int Cholesky_analysis(int node_sum,int m2_elem){
 }
 
 void sparse_LU_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+    double *vector_temp = NULL;
     cs_dis *S;
     cs_din *N;
 
     S = NULL;
     N = NULL;
 
+    vector_temp = ( double * ) calloc( node_sum - 1 + m2_elem, sizeof(double) );
+    memcpy( vector_temp, b_sparse, (node_sum - 1 + m2_elem) * sizeof(double) );
+
+
     S = cs_di_sqr(2, compressed_MNA, 0);
     N = cs_di_lu(compressed_MNA, S, 1);
 
-
-
-    cs_di_ipvec(N->pinv, b_sparse, x_sparse, node_sum - 1 + m2_elem);
+    /*printf("aaaaa\n");
+    cs_di_ipvec( N->pinv, x_sparse, vector_temp, node_sum - 1 + m2_elem );
+    printf("aaaaa\n");
+    cs_di_lsolve( N->L, vector_temp );
+    printf("aaaaa\n");
+    cs_di_usolve( N->U, vector_temp );
+    printf("aaaaa\n");
+    cs_di_ipvec( S->q, vector_temp, x_sparse, node_sum - 1 + m2_elem );
+    printf("aaaaa\n");
+*/
+    cs_di_ipvec(N->pinv, vector_temp, x_sparse, node_sum - 1 + m2_elem);
     cs_di_lsolve(N->L, x_sparse);
     cs_di_usolve(N->U, x_sparse);
-    cs_di_ipvec(S->q, x_sparse, b_sparse, node_sum - 1 + m2_elem);
-
+    cs_di_ipvec(S->q, x_sparse, vector_temp, node_sum - 1 + m2_elem);
+    memcpy( x_sparse, vector_temp, (node_sum - 1 + m2_elem) * sizeof(double) );
     sparse_set_x(node_sum, m2_elem);
 
+    free(vector_temp);
     cs_di_sfree(S);
     cs_di_nfree(N);
 }
 
 void sparse_Cholesky_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
+    double *vector_temp = NULL;
     cs_dis *S;
     cs_din *N;
 
     S = NULL;
     N = NULL;
+
+    vector_temp = ( double * ) calloc( node_sum - 1 + m2_elem, sizeof(double) );
+    memcpy( vector_temp, b_sparse, (node_sum - 1 + m2_elem) * sizeof(double) );
     
     S = cs_di_schol(1, compressed_MNA);
     N = cs_di_chol(compressed_MNA, S);
 
 
-    cs_di_ipvec(S->pinv, b_sparse, x_sparse, node_sum - 1 + m2_elem);
+    cs_di_ipvec(S->pinv, vector_temp, x_sparse, node_sum - 1 + m2_elem);
     cs_di_lsolve(N->L, x_sparse);
     cs_di_ltsolve(N->L, x_sparse);
-    cs_di_pvec(S->pinv, x_sparse, b_sparse, node_sum - 1 + m2_elem);
-
+    cs_di_pvec(S->pinv, x_sparse, vector_temp, node_sum - 1 + m2_elem);
+    memcpy( x_sparse, vector_temp, (node_sum - 1 + m2_elem) * sizeof(double) );
     sparse_set_x(node_sum, m2_elem);
 
     cs_di_sfree(S);

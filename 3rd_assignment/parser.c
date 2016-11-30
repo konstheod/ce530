@@ -5,7 +5,7 @@ struct node * hash_table[HASH_TABLE_SIZE];
 
 int counter_m2 = 0; //counter for elements in team2
 int index_print = 0; //counts element for plot
-
+int non_zeros = 0;
 gsl_vector *x;
 unsigned long int *x_help;
 
@@ -574,8 +574,13 @@ int parser(struct element **element_head, int fd){
 
 				if(input[i] == 'R' || input[i] == 'C' || input[i] == 'L' || input[i] == 'V' || input[i] == 'I'){
 					curr->type = input[i];
+					if(input[i] == 'R'){
+						non_zeros += 4;
+					}
+
 					if(input[i] == 'V' || input[i] == 'L'){
 						counter_m2++;
+						non_zeros += 2;
 					}
 					i++;
 					if(check==i){

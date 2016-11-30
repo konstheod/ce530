@@ -2,6 +2,8 @@
 
 double *b_sparse;
 double *x_sparse;
+int non_zeros;
+
 
 int CG_analysis(int node_sum, int m2_elem){
     int i;
@@ -199,7 +201,8 @@ void sparse_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
         r[i] = b_sparse[i];
     }
 
-    norm_b = gsl_blas_dnrm2(b);
+    norm_b = norm_sparse(b_sparse, node_sum, m2_elem);
+
     if(fabs(norm_b) <= EPS){
         norm_b = 1;
     }
@@ -272,6 +275,7 @@ void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
     get_diag_matrix_sparse(compressed_MNA, MNA_diag, node_sum, m2_elem);
 
     cs_di *compressed_MNA_T = cs_di_transpose (compressed_MNA, (node_sum+m2_elem-1)*(node_sum+m2_elem-1));
+
     double *MNA_diag_T = (double *) malloc((node_sum+m2_elem-1)*sizeof(double));
     get_diag_matrix_sparse(compressed_MNA_T, MNA_diag_T, node_sum, m2_elem);
 
@@ -283,7 +287,7 @@ void sparse_Bi_CG_analysis(cs_di *compressed_MNA, int node_sum, int m2_elem){
         r1[i] = b_sparse[i];
     }
 
-    norm_b = gsl_blas_dnrm2(b);
+    norm_b = norm_sparse(b_sparse, node_sum, m2_elem);
     if(fabs(norm_b) <= EPS){
         norm_b = 1;
     }

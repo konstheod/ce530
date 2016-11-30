@@ -67,6 +67,7 @@ extern unsigned long int *x_help;
 extern gsl_vector *x;
 extern double *b_sparse;
 extern double *x_sparse;
+extern int non_zeros;
 
 int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else is set to 0
 int if_Bi_CG;

@@ -46,12 +46,12 @@ int main(int argc, char *argv[]){
 	
 	if(if_sparse){
 		constructor_sparse(nodes(), m2_elem(), head);
-		// print_MNA_sparse(node_sum, m2_elem);
+		// print_MNA_sparse(nodes(), m2_elem());
 		sparse_matrix(nodes(), m2_elem());
+		print_x();
 		free_mna_sparse();
 	}
 	else{
-		printf("aaaaa111111111\n");
 
 		// make mna
 		printf("Constructs the MNA matrix and b vector\n");
@@ -83,11 +83,11 @@ int main(int argc, char *argv[]){
 			printf("Computing x with LU analysis \n");
 		 	LU_analysis(nodes(),m2_elem());
 		}
+		print_x();
 		free_mna();
 	}
 
 
-	// print_x();
 	
 	//handles PRINT|PLOT if exist in netlist
 	// plot(head);
@@ -209,7 +209,7 @@ void print_x(){
  			perror("write");
  			return;
  		}
- 		sprintf(curr_write,"%.5e", gsl_vector_get(x,i));
+ 		sprintf(curr_write,"%.14e", gsl_vector_get(x,i));
  		check = write(fd_dc, curr_write, strlen(curr_write));
  		if(check<0){
  			perror("write");
