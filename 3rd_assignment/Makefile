@@ -6,7 +6,7 @@
 all: compile_gdb
 
 compile:
-	gcc -O3 spice.c -o spice
+	gcc -O3 -I/usr/local/include -L/usr/local/lib  *.c  -o spice -lblas  -L ./Sparse/CXSparse/Lib  -lm -lcxsparse  -lm -lgsl -lgslcblas 
 
 compile_gdb:
 	gcc  -g -Wall -I/usr/local/include -L/usr/local/lib  *.c  -o spice -lblas  -L ./Sparse/CXSparse/Lib  -lm -lcxsparse  -lm -lgsl -lgslcblas 

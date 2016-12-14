@@ -7,8 +7,7 @@
 #include <unistd.h>
 #include <ctype.h> //for toupper, tolower, isspace
 #include <string.h>
-#include <stdlib.h> // for malloc free  
-#include <gsl/gsl_math.h>
+#include <stdlib.h> // for malloc free
 #include <gsl/gsl_errno.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -26,6 +25,14 @@
 #define NODE_SIZE 40
 #define PREC 15
 #define EPS 1e-16
+#define EXP 0
+#define SIN 1
+#define PULSE 2
+#define PWL 3
+
+//#define M_PI 3.14159265
+
+
 
 
 struct node{
@@ -35,6 +42,47 @@ struct node{
 	struct node *next;
 };
 
+
+
+
+struct spec_exp
+{
+	double value1;
+	double value2;
+	double td1;
+	double tc1;
+	double td2;
+	double tc2;
+};
+
+struct spec_sin
+{
+	double value1;
+	double valuea;
+	double fr;
+	double td;
+	double df;
+	double ph;
+};
+
+struct spec_pulse
+{
+	double value1;
+	double value2;
+	double td;
+	double tr;
+	double tf;
+	double pw;
+	long int per;
+	long int k;
+	double old_value;
+};
+
+struct spec_pwl
+{
+	double value;
+	double t;
+};
 
 struct element{
 	char type; 
@@ -58,11 +106,25 @@ struct element{
 	double increment; //for .DC
 	int dc; //for .DC
 	int b_position; //for .DC, the position of the element to vector b
+	//transient analysis
+	int transient_spec;
+	struct spec_exp *exp_spec;
+	struct spec_sin *sin_spec;
+	struct spec_pulse *pulse_spec;
+	struct spec_pwl *pwl_spec;
+	int pwl_spec_len;
 };
+
 
 extern struct node * hash_table[HASH_TABLE_SIZE];
 extern gsl_matrix *mna;
+extern gsl_matrix *mna_tran;
+extern gsl_matrix *mna_curr;
+extern gsl_matrix *C;
 extern gsl_vector *b;
+extern gsl_vector *e;
+extern gsl_vector *e_prev;
+extern gsl_vector *b_curr;
 extern unsigned long int *x_help;
 extern gsl_vector *x;
 extern double *b_sparse;
@@ -76,7 +138,13 @@ int if_Bi_CG;
 int	if_CG;
 double itol;
 int if_sparse;
+int if_BE;
+int if_tran;
 unsigned long int *if_print; //apothhkeuodai oi metavlhtes pou einai na ginoun PLOT/PRINT
+double time_step;
+double fin_time;
+int vol_counter;
+
 
 /*creates hash code for a node*/
 unsigned long int hash(char *name);
@@ -140,6 +208,7 @@ void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *mnaT
 void axpy_solve(double alpha, gsl_vector *x, gsl_vector *y, int node_sum, int m2_elem);
 void get_diag_matrix(gsl_vector *MNA_diag, int node_sum, int m2_elem, int check, gsl_matrix *mnaT);
 void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_elem);
+void compute_mna_transient(gsl_matrix *C, double value, int node_sum, int m2_elem);
 
 // void get_b_sparse(double *b_sparse, int node_sum, int m2_elem);
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem);
@@ -163,8 +232,19 @@ int MNA_power_dc_sparse(struct element *power, double value, double old_value);
 int plot(struct element *head);
 void constructor_sparse(int node_sum, int m2_elem, struct element *head);
 
+
+double calc_exp(struct spec_exp *spec, double timestamp);
+double calc_sin(struct spec_sin *spec, double timestamp);
+double calc_pulse(struct spec_pulse *spec, double timestamp);
+double calc_pwl(struct element *spec, double timestamp);
+
+void constructor_tran(int node_sum, int m2_elem, struct element *head, double timestamp);
+void constructor_tran_C(int node_sum, int m2_elem, struct element *head);
+void b_tran_constructor(int node_sum, int m2_elem, double timestamp);
+
 /*prints the value of x without DC*/
 void print_x(void);
+int tran_sol(struct element *head); 
 
 
 

@@ -1,5 +1,7 @@
 #include "spice.h"
 
+gsl_matrix *mna_tran;
+
 int if_SPD(int node_sum, int m2_elem){
 
     int i,j;
@@ -70,9 +72,9 @@ double inner_product(gsl_vector *r, gsl_vector *z, int node_sum, int m2_elem){
     return result;
 }
 
-void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *mnaT){
+void mul_vector_matrix(gsl_vector *q, gsl_vector *p, int check, gsl_matrix *matrix){
     if(check){
-        gsl_blas_dgemv( CblasNoTrans, 1.0, mnaT, p, 0.0, q);
+        gsl_blas_dgemv( CblasNoTrans, 1.0, matrix, p, 0.0, q);
     }
     else{
         gsl_blas_dgemv( CblasNoTrans, 1.0, mna, p, 0.0, q);
@@ -119,6 +121,22 @@ void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_el
     }   
     gsl_vector_free(row);
 }
+
+
+void compute_mna_transient(gsl_matrix *C, double value, int node_sum, int m2_elem) {
+    int i,j;
+
+    for(i=0; i<(node_sum+m2_elem-1); i++){
+        for(j=0; j<(node_sum+m2_elem-1); j++){
+            gsl_matrix_set(mna_tran, i, j, gsl_matrix_get(C, i, j)*value);
+        }
+    }
+    gsl_matrix_add (mna_tran, mna);
+
+}
+
+
+
 
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem){
 
@@ -200,3 +218,5 @@ void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_
 
     free(curr_y);
 }
+
+

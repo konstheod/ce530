@@ -24,6 +24,9 @@ int parser(struct element **element_head, int fd){
 	if_Bi_CG = 0;
 	itol = 1e-3;
 	if_sparse = 0;
+	if_BE = 0;
+	if_tran = 0;
+
 
 	while(1){
 		check = read(fd, input, 1000);
@@ -75,7 +78,7 @@ int parser(struct element **element_head, int fd){
 					}
 					i = 0;
 				}
-				if(input[i] == 'D'){
+				if(input[i] == 'D') {
 					//einai DC
 					for(k = 0; k<2; k++){
 						i++;
@@ -241,7 +244,7 @@ int parser(struct element **element_head, int fd){
 						}
 					}
 				}
-				else if(input[i] == 'P'){
+				else if(input[i] == 'P') {
 					//plot 'h print
 
 					i++;
@@ -355,8 +358,162 @@ int parser(struct element **element_head, int fd){
 						}
 					}
 				}
-				else if(input[i] == 'O'){
+				else if(input[i] == 'O') {
 					for(k = 0; k<7; k++){
+						i++;
+						if(check==i){
+							check = read(fd, input, 1000);
+			
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
+					}
+
+					while(input[i]!='\n') {
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 1000);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						for(k=0;k<NODE_SIZE;k++){
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '\n') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							if(check==i){
+								check = read(fd, input, 1000);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+						if(!strcmp(node_name,"SPARSE")) {
+							if_sparse = 1;
+							printf("SPARSE\n");
+						}
+						else if(!strcmp(node_name,"SPD")) {
+							if(if_Bi_CG){
+								if_CG = 1;
+								if_Bi_CG = 0;
+								printf("ITER SPD\n");
+							}
+							else {
+								if_cholesky = 1;
+								printf("SPD\n");
+							}
+						}
+						else if(!strcmp(node_name,"ITER")) {
+							if(if_cholesky) {
+								if_cholesky = 0;
+								if_CG = 1;
+								printf("ITER SPD\n");
+							}
+							else {
+								if_Bi_CG = 1;
+								printf("ITER\n");
+							}
+
+						}
+						else if(!strcmp(node_name,"ITOL")) {
+							while(input[i] == '\t' || input[i] == ' ' || input[i] == '='){
+								i++;
+								if(check==i){
+									check = read(fd, input, 1000);
+									if(check<0){
+										printf("Problem with read\n");
+										close(fd);
+										return(-1);
+									}
+									i = 0;
+								}
+							}
+
+							for(k=0;k<NODE_SIZE;k++){
+								node_name[k]='\0';
+							}
+							k = 0;
+							while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+								node_name[k] = input[i];
+								k++;
+								i++;
+								if(check==i){
+									check = read(fd, input, 1000);
+									if(check<0){
+										printf("Problem with read\n");
+										close(fd);
+										return(-1);
+									}
+									i = 0;
+								}
+							}
+							itol  = atof(node_name);
+							printf("ITOL = %lf\n", itol);
+						}
+						else if(!strcmp(node_name,"METHOD")) {
+							while(input[i] == '\t' || input[i] == ' ' || input[i] == '='){
+								i++;
+								if(check==i){
+									check = read(fd, input, 1000);
+									if(check<0){
+										printf("Problem with read\n");
+										close(fd);
+										return(-1);
+									}
+									i = 0;
+								}
+							}
+
+							for(k=0;k<NODE_SIZE;k++){
+								node_name[k]='\0';
+							}
+							k = 0;
+							while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+								node_name[k] = input[i];
+								k++;
+								i++;
+								if(check==i){
+									check = read(fd, input, 1000);
+									if(check<0){
+										printf("Problem with read\n");
+										close(fd);
+										return(-1);
+									}
+									i = 0;
+								}
+							}
+							
+							if(!strcmp(node_name,"BE")) {
+								if_BE = 1;
+								printf("BE\n");
+							}
+							else{
+								printf("TR\n");
+							}
+
+						}
+
+					}		
+				}
+				else if(input[i] == 'T') {
+					if_tran = 1;
+					for(k = 0; k<4; k++){
 						i++;
 						if(check==i){
 							check = read(fd, input, 1000);
@@ -385,7 +542,7 @@ int parser(struct element **element_head, int fd){
 						node_name[k]='\0';
 					}
 					k = 0;
-					while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
+					while(input[i] != '\t' && input[i] != ' ' && input[i] != '\n') {
 						node_name[k] = input[i];
 						k++;
 						i++;
@@ -399,151 +556,42 @@ int parser(struct element **element_head, int fd){
 							i = 0;
 						}
 					}
-					if(!strcmp(node_name,"SPARSE")){
-						if_sparse = 1;
-						while(input[i] == '\t' || input[i] == ' '){
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						for(k=0;k<NODE_SIZE;k++){
-							node_name[k]='\0';
-						}
-						k = 0;
-						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
-							node_name[k] = input[i];
-							k++;
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-					}
-					if(!strcmp(node_name,"SPD")){
-						while(input[i] == '\t' || input[i] == ' '){
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						for(k=0;k<NODE_SIZE;k++){
-							node_name[k]='\0';
-						}
-						k = 0;
-						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
-							node_name[k] = input[i];
-							k++;
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						if(!strcmp(node_name,"ITER")){
-							if_CG = 1;
-						}
-						else{
-							if_cholesky = 1;
-						}
 
-					}
-					else if(!strcmp(node_name,"ITER")){
-						while(input[i] == '\t' || input[i] == ' '){
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						for(k=0;k<NODE_SIZE;k++){
-							node_name[k]='\0';
-						}
-						k = 0;
-						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
-							node_name[k] = input[i];
-							k++;
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						if(!strcmp(node_name,"SPD")){
-							if_CG = 1;
-						}
-						else{
-							if_Bi_CG = 1;
-						}
-					}
-					else if(!strcmp(node_name,"ITOL")){
-						while(input[i] == '\t' || input[i] == ' ' || input[i] == '='){
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						for(k=0;k<NODE_SIZE;k++){
-							node_name[k]='\0';
-						}
-						k = 0;
-						while(input[i] != '\t' && input[i] != ' ' && input[i] != '=' && input[i] != '\n') {
-							node_name[k] = input[i];
-							k++;
-							i++;
-							if(check==i){
-								check = read(fd, input, 1000);
-								if(check<0){
-									printf("Problem with read\n");
-									close(fd);
-									return(-1);
-								}
-								i = 0;
-							}
-						}
-						itol  =atof(node_name);
+					time_step = atof(node_name);
 
+					while(input[i] == '\t' || input[i] == ' '){
+						i++;
+						if(check==i){
+							check = read(fd, input, 1000);
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
 					}
-						
+					for(k=0;k<NODE_SIZE;k++){
+						node_name[k]='\0';
+					}
+					k = 0;
+					while(input[i] != '\t' && input[i] != ' ' && input[i] != '\n') {
+						node_name[k] = input[i];
+						k++;
+						i++;
+						if(check==i){
+							check = read(fd, input, 1000);
+							if(check<0){
+								printf("Problem with read\n");
+								close(fd);
+								return(-1);
+							}
+							i = 0;
+						}
+					}
+
+					fin_time = atof(node_name);
+					printf("time_step = %lf fin_time = %lf \n",time_step, fin_time );
 				}
 			}
 			else{
@@ -554,6 +602,7 @@ int parser(struct element **element_head, int fd){
 					printf("Error to malloc!\n");
 					return(-1);
 				}
+				curr->transient_spec = -1;
 				
 				if(head != NULL){
 					if(tail!=NULL){
@@ -574,6 +623,8 @@ int parser(struct element **element_head, int fd){
 
 				if(input[i] == 'R' || input[i] == 'C' || input[i] == 'L' || input[i] == 'V' || input[i] == 'I'){
 					curr->type = input[i];
+
+					//find max_non_zeroes elements for sparse
 					if(input[i] == 'R'){
 						non_zeros += 4;
 					}
@@ -582,6 +633,7 @@ int parser(struct element **element_head, int fd){
 						counter_m2++;
 						non_zeros += 2;
 					}
+
 					i++;
 					if(check==i){
 						check = read(fd, input, 1000);
@@ -715,8 +767,400 @@ int parser(struct element **element_head, int fd){
 					}
 
 					curr->value = atof(curr_value);
-					if(curr->value == 0 && (curr->neg== '0' || curr->pos== '0')){
-						curr->type = 'L';
+
+					//looking for transient_spec
+
+					if((curr->type == 'I' || curr->type== 'V') && input[i]!='\n'){
+
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 1000);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+							
+						}
+
+						for(k=0;k<NODE_SIZE;k++) {
+							node_name[k]='\0';
+						}
+						k = 0;
+						while(input[i] != '\t' && input[i] != ' ' && input[i] != '(') {
+							node_name[k] = input[i];
+							k++;
+							i++;
+							
+							if(check==i){
+								check = read(fd, input, 1000);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+
+						if(!strcmp(node_name,"EXP")) {
+
+							curr->exp_spec = (struct spec_exp *) malloc (sizeof(struct spec_exp));
+							if(curr->exp_spec == NULL){
+								printf("Error to malloc!\n");
+								return(-1);
+							}
+
+							curr->transient_spec = EXP;
+
+							for(j = 0; j < 6; j++){
+
+								while(input[i] == '\t' || input[i] == ' ' || input[i] == '('){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								for(k=0;k<SIZE_VALUE;k++) {
+									curr_value[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ' && input[i] != '(' && input[i] != ')') {
+									curr_value[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								if(j == 0){
+									curr->exp_spec->value1 = atof(curr_value);
+									// printf("value1 = %lf\n", curr->exp_spec->value1);
+								}
+								else if(j == 1){
+									curr->exp_spec->value2 = atof(curr_value);
+									// printf("value2 = %lf\n", curr->exp_spec->value2);
+								}
+								else if(j == 2){
+									curr->exp_spec->td1 = atof(curr_value);
+									// printf("td1 = %lf\n", curr->exp_spec->td1);
+								}
+								else if(j == 3){
+									curr->exp_spec->tc1 = atof(curr_value);
+									// printf("tc1 = %lf\n", curr->exp_spec->tc1);
+								}
+								else if(j == 4){
+									curr->exp_spec->td2 = atof(curr_value);
+									// printf("td2 = %lf\n", curr->exp_spec->td2);
+								}
+								if(j == 5){
+									curr->exp_spec->tc2 = atof(curr_value);
+									// printf("tc2 = %lf\n", curr->exp_spec->tc2);
+								}
+							}
+						} 
+						else if(!strcmp(node_name,"SIN")) {
+
+							curr->sin_spec = (struct spec_sin *) malloc (sizeof(struct spec_sin));
+							if(curr->sin_spec == NULL){
+								printf("Error to malloc!\n");
+								return(-1);
+							}
+
+							curr->transient_spec = SIN;
+
+							for(j = 0; j < 6; j++){
+
+								while(input[i] == '\t' || input[i] == ' ' || input[i] == '('){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								for(k=0;k<SIZE_VALUE;k++) {
+									curr_value[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ' && input[i] != '(' && input[i] != ')') {
+									curr_value[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								if(j == 0){
+									curr->sin_spec->value1 = atof(curr_value);
+									// printf("value1 = %lf\n", curr->sin_spec->value1);
+								}
+								else if(j == 1){
+									curr->sin_spec->valuea = atof(curr_value);
+									// printf("valuea = %lf\n", curr->sin_spec->valuea);
+								}
+								else if(j == 2){
+									curr->sin_spec->fr = atof(curr_value);
+									// printf("fr = %lf\n", curr->sin_spec->fr);
+								}
+								else if(j == 3){
+									curr->sin_spec->td = atof(curr_value);
+									// printf("td = %lf\n", curr->sin_spec->td);
+								}
+								else if(j == 4){
+									curr->sin_spec->df = atof(curr_value);
+									// printf("df = %lf\n", curr->sin_spec->df);
+								}
+								if(j == 5){
+									curr->sin_spec->ph = atof(curr_value);
+									// printf("ph = %lf\n", curr->sin_spec->ph);
+								}
+							}
+						}
+						else if(!strcmp(node_name,"PULSE")) {
+
+							curr->pulse_spec = (struct spec_pulse *) malloc (sizeof(struct spec_pulse));
+							if(curr->pulse_spec == NULL){
+								printf("Error to malloc!\n");
+								return(-1);
+							}
+
+							curr->transient_spec = PULSE;
+
+							for(j = 0; j < 7; j++){
+
+								while(input[i] == '\t' || input[i] == ' ' || input[i] == '('){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								for(k=0;k<SIZE_VALUE;k++) {
+									curr_value[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ' && input[i] != '(' && input[i] != ')') {
+									curr_value[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								if(j == 0){
+									curr->pulse_spec->value1 = atof(curr_value);
+									// printf("value1 = %lf\n", curr->pulse_spec->value1);
+								}
+								else if(j == 1){
+									curr->pulse_spec->value2 = atof(curr_value);
+									// printf("value2 = %lf\n", curr->pulse_spec->value2);
+								}
+								else if(j == 2){
+									curr->pulse_spec->td = atof(curr_value);
+									// printf("td = %lf\n", curr->pulse_spec->td);
+								}
+								else if(j == 3){
+									curr->pulse_spec->tr = atof(curr_value);
+									// printf("tr = %lf\n", curr->pulse_spec->tr);
+								}
+								else if(j == 4){
+									curr->pulse_spec->tf = atof(curr_value);
+									// printf("tf = %lf\n", curr->pulse_spec->tf);
+								}
+								else if(j == 5){
+									curr->pulse_spec->pw = atof(curr_value);
+									// printf("pw = %lf\n", curr->pulse_spec->pw);
+								}
+								if(j == 6){
+									curr->pulse_spec->per = atof(curr_value);
+									// printf("per = %ld\n", curr->pulse_spec->per);
+								}
+							}
+							curr->pulse_spec->k = 0;
+							curr->pulse_spec->old_value = curr->value;
+						} 
+						if(!strcmp(node_name,"PWL")) {
+							int new_line = 0;
+
+							curr->pwl_spec = (struct spec_pwl *) malloc (sizeof(struct spec_pwl));
+							if(curr->pwl_spec == NULL){
+								printf("Error to malloc!\n");
+								return(-1);
+							}
+
+							curr->transient_spec = PWL;
+							j = 0;
+							while(1) {
+
+								while(input[i] == '\t' || input[i] == ' ' || input[i] == '(' || input[i] == '\n' || input[i] == ')'){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+									if(input[i] == '\n')
+									{
+										new_line = 1;
+										curr->pwl_spec_len = j-1;
+										break;
+									}
+								}
+
+								if(new_line) {
+									break;
+								}
+
+								if(j != 0){
+									curr->pwl_spec = (struct spec_pwl *) realloc(curr->pwl_spec,sizeof(struct spec_pwl) * (j + 1));
+								} 
+
+								for(k=0;k<SIZE_VALUE;k++) {
+									curr_value[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ') {
+									curr_value[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								curr->pwl_spec[j].t = atof(curr_value);
+								// printf("%d: pwl->time  = %lf \n", j, curr->pwl_spec[j].t);
+
+								while(input[i] == '\t' || input[i] == ' '){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								for(k=0;k<SIZE_VALUE;k++) {
+									curr_value[k]='\0';
+								}
+								k = 0;
+								while(input[i] != '\t' && input[i] != ' ' && input[i] != ')') {
+									curr_value[k] = input[i];
+									k++;
+									i++;
+									
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+								}
+
+								curr->pwl_spec[j].value = atof(curr_value);
+								// printf("%d: pwl->value  = %lf \n", j, curr->pwl_spec[j].value);
+
+								while(input[i] == '\t' || input[i] == ' ' || input[i] == ')' || input[i] == '\n'){
+									i++;
+									if(check==i){
+										check = read(fd, input, 1000);
+										if(check<0){
+											printf("Problem with read\n");
+											close(fd);
+											return(-1);
+										}
+										i = 0;
+									}
+									if(input[i] == '\n')
+									{
+										new_line = 1;
+										curr->pwl_spec_len = j;
+										break;
+									}
+								}
+
+								j++;
+							}
+						}
+
+
+						while(input[i] == '\t' || input[i] == ' '){
+							i++;
+							if(check==i){
+								check = read(fd, input, 1000);
+								if(check<0){
+									printf("Problem with read\n");
+									close(fd);
+									return(-1);
+								}
+								i = 0;
+							}
+						}
+
 					}
 					curr->dc = 0;
 					continue;

@@ -51,9 +51,6 @@ int main(int argc, char *argv[]){
 		sparse_matrix(nodes(), m2_elem());
 		print_x();	
 		plot(head);	
-		free_mna_sparse();
-
-		cs_di_spfree(compressed_MNA);
 	}
 	else{
 
@@ -90,13 +87,23 @@ int main(int argc, char *argv[]){
 		print_x();
 		//handles PRINT|PLOT if exist in netlist
 		plot(head);	
-		free_mna();
+	}
+
+	if(if_tran) {
+		tran_sol(head);
 	}
 
 
 	
 
 	//free the structurs
+	if(if_sparse) {
+		free_mna_sparse();
+		cs_di_spfree(compressed_MNA);
+	}
+	else {
+		free_mna();
+	}
 	free_elements(&head);
 	free_nodes(hash_table);
 
@@ -233,4 +240,104 @@ void print_x(){
 	
 
 	close(fd_dc);
+}
+
+int tran_sol(struct element *head) {
+	int i, j, check;
+	double timestamp = time_step;
+
+	if(if_sparse){
+		printf("Constructs the MNA matrix and b vector\n");
+		constructor_sparse(nodes(), m2_elem(), head);
+		// print_MNA_sparse(nodes(), m2_elem());
+		sparse_matrix(nodes(), m2_elem());
+		print_x();	
+		plot(head);	
+		free_mna_sparse();
+
+		cs_di_spfree(compressed_MNA);
+	}
+	else{
+
+		// make mna
+		printf("Constructs the C matrix \n");
+		constructor_tran_C(nodes(),m2_elem(), head );
+		
+		gsl_matrix_memcpy(mna_curr,mna);
+
+		gsl_vector_memcpy(e_prev, b);
+
+		gsl_vector_memcpy(b_curr, b);
+		
+		if(!if_BE) {
+			compute_mna_transient(C, 2/time_step, nodes(), m2_elem());
+		}
+		else {
+			compute_mna_transient(C, 1/time_step, nodes(), m2_elem() );
+		}
+
+		while(timestamp <= fin_time) {
+			printf("time_step : %lf, fin_time %lf\n",time_step, fin_time );
+			gsl_matrix_memcpy(mna, mna_tran);
+			gsl_vector_memcpy(b, e_prev);
+
+			constructor_tran(nodes(),m2_elem(), head, timestamp); //calculates the e(tk) and not the b 
+			
+			gsl_vector_memcpy(e,b);  //the above save the e(tk) to the b, so we must copy it to the right variable
+
+
+			b_tran_constructor(nodes(),m2_elem(), time_step);
+
+			//print_MNA(nodes(),m2_elem());
+			// if(if_cholesky){
+			// 	printf("Computing x with Cholesky analysis \n");
+			// 	check = Cholesky_analysis(nodes(),m2_elem());
+			// 	if(check == -1){
+			// 		return -1;
+			// 	}
+			// }
+			// else if(if_CG){
+			// 	printf("Computing x with CG analysis \n");
+			// 	check = CG_analysis(nodes(),m2_elem());
+			// 	if(check == -1){
+			// 		return -1;
+			// 	}
+			// }
+			// else if(if_Bi_CG){
+			// 	printf("Computing x with Bi_CG analysis \n");
+			// 	check = Bi_CG_analysis(nodes(),m2_elem());
+			// 	if(check == -1){
+			// 		printf("Mulfunction with Bi_CG analysis \n");
+			// 		return -1;
+			// 	}
+			// }
+			// else{
+			// printf("-----------------------vector_b before------------------\n");
+   //          for(i=0; i<(nodes()+m2_elem()-1); i++){
+   //              printf("%d: %lf\n",i, gsl_vector_get(x,i));
+   //          }
+			// for(i=0; i<(nodes()+m2_elem()-1); i++){
+   //              gsl_vector_set(x,i,0.0);
+   //          }
+				printf("Computing x with LU analysis \n");
+			 	LU_analysis(nodes(),m2_elem());
+
+			printf("\nVector x:%lf\n\n",timestamp);
+            for(i=0; i<(nodes()+m2_elem()-1); i++){
+                printf("%d: %lf\n",i, gsl_vector_get(x,i));
+            }
+			// }
+			// print_x();
+			// //handles PRINT|PLOT if exist in netlist
+			// plot(head);	
+
+			timestamp += time_step;
+			// gsl_matrix_memcpy(mna,mna_curr);
+		}
+	    gsl_vector_memcpy(b,b_curr);
+        gsl_vector_free(b_curr);
+	    
+		
+	}
+	return 0;
 }
