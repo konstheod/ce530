@@ -1,6 +1,10 @@
 #include "spice.h"
 
 gsl_matrix *mna_tran;
+gsl_matrix *mna;
+cs_di *MNA_tran_sparse;
+cs_di *compressed_MNA;
+int non_zeros;
 
 int if_SPD(int node_sum, int m2_elem){
 
@@ -122,7 +126,6 @@ void matrix_transpose(gsl_matrix *dest, gsl_matrix *src, int node_sum, int m2_el
     gsl_vector_free(row);
 }
 
-
 void compute_mna_transient(gsl_matrix *C, double value, int node_sum, int m2_elem) {
     int i,j;
 
@@ -136,7 +139,7 @@ void compute_mna_transient(gsl_matrix *C, double value, int node_sum, int m2_ele
 }
 
 
-
+/*********************************SPARSE helper_functions****************************************/
 
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem){
 
@@ -201,8 +204,6 @@ void mul_vector_matrix_sparse(cs_di *compressed_MNA, double *x, double *y, int n
             y[j] = y[j] + compressed_MNA->x[p]*x[compressed_MNA->i[p]];
         }
     }
-
-    
 }
 
 void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_elem){
@@ -217,6 +218,28 @@ void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_
     }
 
     free(curr_y);
+}
+
+void compute_mna_transient_sparse(double value, int node_sum, int m2_elem) {
+    //curr = C 
+    if(if_BE){
+        MNA_tran_sparse = cs_di_add(compressed_MNA, C_sparse, 1.0, 1.0);    
+    }
+    else{
+        MNA_tran_sparse = cs_di_add(compressed_MNA, C_sparse, 1.0, -1.0);    
+
+    }
+
+}
+
+cs_di * memcopy_compressed_matrices(cs_di *dest, cs_di *source, int node_sum, int m2_elem) {
+    cs_di *temp;
+    temp = cs_di_spalloc( (node_sum + m2_elem-1), (node_sum + m2_elem-1), non_zeros, 1, 1);
+    dest = cs_di_compress(temp);
+    cs_di_spfree(temp);
+    cs_di_dupl(dest);
+    dest = cs_di_add(dest, source, 0.0, 1.0);
+    return dest ;
 }
 
 

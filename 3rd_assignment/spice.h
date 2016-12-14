@@ -42,11 +42,7 @@ struct node{
 	struct node *next;
 };
 
-
-
-
-struct spec_exp
-{
+struct spec_exp {
 	double value1;
 	double value2;
 	double td1;
@@ -55,8 +51,7 @@ struct spec_exp
 	double tc2;
 };
 
-struct spec_sin
-{
+struct spec_sin {
 	double value1;
 	double valuea;
 	double fr;
@@ -65,8 +60,7 @@ struct spec_sin
 	double ph;
 };
 
-struct spec_pulse
-{
+struct spec_pulse {
 	double value1;
 	double value2;
 	double td;
@@ -78,8 +72,7 @@ struct spec_pulse
 	double old_value;
 };
 
-struct spec_pwl
-{
+struct spec_pwl {
 	double value;
 	double t;
 };
@@ -131,6 +124,14 @@ extern double *b_sparse;
 extern double *x_sparse;
 extern int non_zeros;
 extern cs_di *compressed_MNA;
+extern cs_di *C_sparse;
+extern cs_di *MNA_tran_sparse;
+extern cs_di *mna_curr_sparse;
+extern double *e_sparse;
+extern double *e_prev_sparse;
+extern double *b_curr_sparse;
+
+
 
 
 int if_cholesky; //if user wants Cholesky analysis the variable turns to 1, else is set to 0
@@ -217,6 +218,8 @@ void precondition_solver_sparse(double *r, double *z, double *MNA_diag, int node
 double inner_product_sparse(double *r, double *z, int node_sum, int m2_elem);
 void mul_vector_matrix_sparse(cs_di *compressed_MNA, double *x, double *y, int node_sum, int m2_elem);
 void axpy_solve_sparse(double alpha, double *x, double *y, int node_sum, int m2_elem);
+void compute_mna_transient_sparse(double value, int node_sum, int m2_elem);
+cs_di * memcopy_compressed_matrices(cs_di *dest, cs_di *source, int node_sum, int m2_elem);
 
 void sparse_matrix(int node_sum, int m2_elem);
 void sparse_LU_analysis(int node_sum, int m2_elem);
@@ -231,6 +234,11 @@ int MNA_power_dc_sparse(struct element *power, double value, double old_value);
 /*prints to file the result of print*/
 int plot(struct element *head);
 void constructor_sparse(int node_sum, int m2_elem, struct element *head);
+void constructor_C_sparse(int node_sum, int m2_elem, struct element *head);
+void b_tran_constructor_sparse(int node_sum, int m2_elem, double timestamp);
+void constructor_tran_sparse(int node_sum, int m2_elem, struct element *head, double timestamp);
+int MNA_power_tran_sparse(struct element *curr, double timestamp);
+int MNA_voltage_tran_sparse(struct element *curr, int node_sum, double timestamp);
 
 
 double calc_exp(struct spec_exp *spec, double timestamp);

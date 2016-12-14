@@ -283,7 +283,6 @@ int C_capacity(struct element *cap) {
     return(0);
 }
 
-
 void free_mna(){
 
     free(x_help);
@@ -406,6 +405,17 @@ void b_tran_constructor(int node_sum, int m2_elem, double timestamp) {
             }
 
             gsl_matrix_sub(curr_matrix_mna, curr_matrix);
+            printf("----curr_matrix_mna----\n");
+            for(i=0; i<(node_sum+m2_elem-1); i++){
+                printf("col %d\n", i );
+                for(j=0; j<(node_sum+m2_elem-1); j++){
+                    if( gsl_matrix_get(curr_matrix_mna,i,j)!= 0.0){
+                    printf("\t%d %g\n",j, gsl_matrix_get(curr_matrix_mna,i,j));
+                }
+                }
+                printf("\n");
+            }
+
             gsl_vector_memcpy(temp,e);
 
             gsl_vector_add(e, e_prev);
@@ -416,7 +426,6 @@ void b_tran_constructor(int node_sum, int m2_elem, double timestamp) {
         }
 
         else {
-            printf("!!!!!!!!!!!!!!!!!EULER!!!!!!!!!!!!!!!!!!!!!\n");
             mul_vector_matrix(curr_vector, x, 1, C);
             for(i=0; i<(node_sum+m2_elem-1); i++){
                     gsl_vector_set(curr_vector, i, gsl_vector_get(curr_vector, i)*(1/time_step));
