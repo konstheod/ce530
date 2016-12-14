@@ -99,36 +99,20 @@ int MNA_power_tran(struct element *power, double timestamp){
 
     if(power->transient_spec == EXP) {
         value = calc_exp(power->exp_spec, timestamp);
-        if(timestamp!=time_step) {
-            old_value = calc_exp(power->exp_spec, timestamp - time_step);
-        }
     }
     else if(power->transient_spec == SIN) {
         value = calc_sin(power->sin_spec, timestamp);
-        if(timestamp!=time_step) {
-            old_value = calc_sin(power->sin_spec, timestamp - time_step);
-        }
     }
     else if(power->transient_spec == PULSE) {
         
         value = calc_pulse(power->pulse_spec, timestamp);
-        if(timestamp!=time_step) {
-            old_value = power->pulse_spec->old_value;
-
-        }       
-
-        power->pulse_spec->old_value = value;
     }
     else if(power->transient_spec == PWL) {
         value = calc_pwl(power, timestamp);
-        if(timestamp!=time_step) {
-            old_value = calc_pwl(power, timestamp - time_step);
-        }
     }
 
-    if(timestamp == time_step) {
-        old_value = power->value;
-    }
+    old_value = power->value;
+
 
     
     
@@ -170,8 +154,7 @@ int MNA_power_dc(struct element *power, double value, double old_value){
         gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) - value);
         return 1;
     }
-        // printf("MNA_power_dc %lf\n", gsl_vector_get(b,(neg-1)));
-   
+    
     gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) - old_value);
     gsl_vector_set(b,(neg-1),gsl_vector_get(b,(neg-1)) + value);
     gsl_vector_set(b,(pos-1),gsl_vector_get(b,(pos-1)) + old_value);
@@ -290,11 +273,6 @@ void free_mna(){
     gsl_vector_free (x);
     gsl_vector_free(b);
     gsl_matrix_free(mna);
-    if(if_tran) {
-        gsl_matrix_free(C);
-        gsl_matrix_free(mna_tran);
-        gsl_matrix_free(mna_curr);
-    }
 }
 
 void print_MNA(int node_sum, int m2_elem){
@@ -399,6 +377,7 @@ void b_tran_constructor(int node_sum, int m2_elem, double timestamp) {
     gsl_matrix_memcpy(curr_matrix_mna, mna_curr);
     if(timestamp != 0) {
         if(!if_BE) {
+            printf("\nComputing with Trapezoidal\n");
             for(i=0; i<(node_sum+m2_elem-1); i++){
                 for(j=0; j<(node_sum+m2_elem-1); j++){
                     gsl_matrix_set(curr_matrix, i, j, gsl_matrix_get(C, i, j)*(2/time_step));
@@ -416,7 +395,7 @@ void b_tran_constructor(int node_sum, int m2_elem, double timestamp) {
         }
 
         else {
-            printf("!!!!!!!!!!!!!!!!!EULER!!!!!!!!!!!!!!!!!!!!!\n");
+            printf("\nComputing with Backward Euler\n");
             mul_vector_matrix(curr_vector, x, 1, C);
             for(i=0; i<(node_sum+m2_elem-1); i++){
                     gsl_vector_set(curr_vector, i, gsl_vector_get(curr_vector, i)*(1/time_step));

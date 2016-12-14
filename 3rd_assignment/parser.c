@@ -1598,6 +1598,9 @@ int plot(struct element *head){
 	int new_file;
 	int lim;
 	int t;
+	FILE * file_fd;
+	FILE **plot_files;
+	char **plot_names;
 
 	strcpy(def_file_name,"node_name");
 	strcpy(file_name,def_file_name);
@@ -1810,5 +1813,118 @@ int plot(struct element *head){
 			close(fd);
 		}
 	}
+
+	if(!if_tran){
+		return 0;
+	}
+	tran_init(head);
+
+	strcpy(def_file_name,"node_");
+	strcpy(file_name,def_file_name);
+
+	//loop for all the print elements
+	new_file = 0;
+
+    plot_files = (FILE **)malloc(sizeof(FILE *) * index_print);
+    plot_names = (char **)malloc(sizeof(char *) * index_print);
+
+	for(i = 0; i < index_print; i++){
+		new_file = 0;
+		for(k = 5; k < 33; k++){
+			file_name[k] = '\0';
+		}
+		//construct the correct file name
+		strcat(file_name,find_value(if_print[i]));
+		strcat(file_name,"_tran");
+		strcpy(def_file_name, file_name);
+
+		while(1){
+			strcat(file_name,".txt");
+			file_fd = fopen(file_name, "r");
+
+			//fd = open(file_name, O_RDONLY, 0777);
+			if(file_fd!=NULL){
+				for(k = 0; k < 33; k++){
+					file_name[k] = '\0';
+				}
+				new_file++;
+				for(k = strlen(find_value(if_print[i])) + 9; k < strlen(file_name); k++){
+					file_name[k] = '\0';
+				}
+				strcpy(file_name,def_file_name);
+
+				strcat(file_name,"_");
+				strcat(file_name,"(");
+				sprintf(curr_write,"%d", new_file);
+				strcat(file_name,curr_write);
+				strcat(file_name,")");
+				close(fd);
+			}
+			else if(file_fd == NULL){
+				//printf("%s\n",file_name );
+				file_fd = fopen(file_name, "w");
+//				fd = open(file_name, O_CREAT | O_WRONLY, 0777);
+				if(file_fd == NULL){
+					perror("open");
+					return -1;
+				}
+				plot_names[i] = (char *)malloc(sizeof(char ) * strlen(file_name));
+				plot_files[i] = file_fd;
+				strcpy(plot_names[i], file_name);
+				// printf("%s\n",plot_names[i]);
+				// printf("%p\n", file_fd);
+				// printf("%p\n", plot_files[i]);
+				break;
+			}
+		}	
+	}
+	
+	tran_sol(head, if_print, index_print, plot_files);
+	
+	if(if_tran){
+		FILE *pipe = NULL;
+		char line[3000];
+		pipe = popen( "gnuplot -persist", "w" );
+		if(pipe == NULL){
+			printf("Failed to open the Pipe\n");
+			goto exit_parser;
+		}
+		//fprintf(temp, "\n");
+		fprintf(pipe, "%s \n", "set title 'Transient Analysis'");
+		fprintf(pipe, "%s \n", "set xlabel 'Steps'");
+		fprintf(pipe, "%s \n", "set ylabel 'Voltage'");
+		fprintf(pipe, "%s \n", "set grid");
+		fprintf(pipe, "%s \n", "set zeroaxis");
+		
+		fprintf(pipe, "%s \n", "set key top right");
+		fprintf(pipe, "%s \n", "set terminal wxt size 800,600");
+		fprintf(pipe, "%s \n", "set autoscale");
+
+		for(i = 0; i < index_print; i++){
+			fflush(plot_files[i]);
+			
+			if(i!=0){
+
+				line[0] = '\0';
+				sprintf(line, "replot \'%s\' using 1:2  title \'%s\' with line", plot_names[i], find_value(if_print[i]));
+				fprintf(pipe, "%s \n",line);
+
+			}
+			else{
+				line[0] = '\0';
+				sprintf(line, "plot \'%s\' using 1:2  title \'%s\' with line", plot_names[i], find_value(if_print[i]));
+				fprintf(pipe, "%s \n",line);
+
+			}
+		}
+exit_parser:
+
+		for(i = 0; i < index_print; i++){
+			fclose(plot_files[i]);
+		}
+		fclose(pipe);
+
+	}
+	close(fd);
 	return 0;
 }

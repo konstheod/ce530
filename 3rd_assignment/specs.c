@@ -16,7 +16,6 @@ double calc_exp(struct spec_exp *spec, double timestamp) {
 		value = -(timestamp - spec->td2)/spec->tc2;
 		curr = -(timestamp - spec->td1)/spec->tc1;
 		value = spec->value1 + (spec->value2 - spec->value1)*(exp(value) - exp(curr));
-
 	}
 	return value;	
 }
@@ -38,8 +37,6 @@ double calc_sin(struct spec_sin *spec, double timestamp) {
 		value = (spec->valuea * sin(value)) * exp(curr);
 		value += spec->value1 ;
 	}
-
-	printf("timestamp :%lf VALUE  SIN: %lf\n",timestamp, value);
 	return value;	
 }
 
@@ -90,7 +87,5 @@ double calc_pwl(struct element *spec, double timestamp) {
 			value = spec->pwl_spec[spec->pwl_spec_len].value;
 		}
 	}
-	
-	printf("timestamp = %lf, value = %lf\n",timestamp, value );
 	return value;
 }
