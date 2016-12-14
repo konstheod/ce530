@@ -252,8 +252,9 @@ void b_tran_constructor(int node_sum, int m2_elem, double timestamp);
 
 /*prints the value of x without DC*/
 void print_x(void);
-int tran_sol(struct element *head); 
+int tran_sol(struct element *head, unsigned long int *print_node, int index_print, FILE ** fd); 
 
-
+int tran_init(struct element *head);
+int tran_free();
 
 #endif
