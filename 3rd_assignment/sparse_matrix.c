@@ -369,6 +369,7 @@ void constructor_sparse(int node_sum, int m2_elem, struct element *head){
         }
         i++;
     }
+    printf("%d elements\n",i );
     compressed_MNA = cs_di_compress(sparse_MNA);
     //if(!if_tran) {
     cs_di_spfree(sparse_MNA);

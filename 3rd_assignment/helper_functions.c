@@ -138,7 +138,6 @@ void compute_mna_transient(gsl_matrix *C, double value, int node_sum, int m2_ele
 
 }
 
-
 /*********************************SPARSE helper_functions****************************************/
 
 void get_diag_matrix_sparse(cs_di *compressed_MNA, double *MNA_diag, int node_sum, int m2_elem){
@@ -239,7 +238,7 @@ cs_di * memcopy_compressed_matrices(cs_di *dest, cs_di *source, int node_sum, in
     cs_di_spfree(temp);
     cs_di_dupl(dest);
     dest = cs_di_add(dest, source, 0.0, 1.0);
-    return dest ;
+    return dest;
 }
 
 

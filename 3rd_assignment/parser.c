@@ -769,7 +769,6 @@ int parser(struct element **element_head, int fd){
 					curr->value = atof(curr_value);
 
 					//looking for transient_spec
-
 					if((curr->type == 'I' || curr->type== 'V') && input[i]!='\n'){
 
 						while(input[i] == '\t' || input[i] == ' '){
@@ -1025,7 +1024,7 @@ int parser(struct element **element_head, int fd){
 							curr->pulse_spec->k = 0;
 							curr->pulse_spec->old_value = curr->value;
 						} 
-						if(!strcmp(node_name,"PWL")) {
+						else if(!strcmp(node_name,"PWL")) {
 							int new_line = 0;
 
 							curr->pwl_spec = (struct spec_pwl *) malloc (sizeof(struct spec_pwl));
@@ -1148,7 +1147,7 @@ int parser(struct element **element_head, int fd){
 						}
 
 
-						while(input[i] == '\t' || input[i] == ' '){
+						while(input[i] == '\t' || input[i] == ' ' || input[i]==')'){
 							i++;
 							if(check==i){
 								check = read(fd, input, 1000);

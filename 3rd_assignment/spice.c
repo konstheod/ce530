@@ -8,12 +8,6 @@ gsl_vector *b;
 gsl_vector *x;
 int vol_counter;
 unsigned long int *x_help;
-cs_di *C_sparse;
-cs_di *MNA_tran_sparse;
-cs_di *mna_curr_sparse;
-
-
-
 
 gsl_matrix *mna_tran;
 gsl_matrix *mna_curr;
@@ -21,6 +15,18 @@ gsl_matrix *C;
 gsl_vector *e;
 gsl_vector *e_prev;
 gsl_vector *b_curr;
+
+cs_di *C_sparse;
+cs_di *MNA_tran_sparse;
+cs_di *mna_curr_sparse;
+cs_di *compressed_MNA;
+
+double *b_sparse;
+double *x_sparse;
+double *e_sparse;
+double *b_curr_sparse;
+double *e_prev_sparse;
+int non_zeros;
 
 int main(int argc, char *argv[]){
 	int fd;
@@ -309,32 +315,9 @@ int tran_sol(struct element *head, unsigned long int *print_node, int index_prin
 		
 		//Construct C matrix
 		constructor_C_sparse(nodes(), m2_elem(), head);
-//		cs_di_spfree( mna_curr_sparse );
-
-		// cs_di *temp;
-		// temp = cs_di_spalloc( (nodes()+ m2_elem()-1), (nodes()+ m2_elem()-1), non_zeros, 1, 1);
-		// mna_curr_sparse = cs_di_compress(temp);
-	 //    cs_di_spfree(temp);
-	 //    cs_di_dupl(mna_curr_sparse);
-
-		// mna_curr_sparse = cs_di_add(mna_curr_sparse,compressed_MNA, 0.0, 1.0);
 		mna_curr_sparse = memcopy_compressed_matrices(mna_curr_sparse, compressed_MNA, nodes(), m2_elem());
-
-		// printf("----C----\n");
-		// cs_di_print (mna_curr_sparse,0);
-		// cs_di_print (compressed_MNA,0);
-		
-		// return 0;
-		
-    	//mna_curr_sparse = compressed_MNA;
-    	
-
-		// memcopy_compressed_matrices(mna_curr_sparse, compressed_MNA, nodes(), m2_elem());
-
 		memcpy(e_prev_sparse, b_sparse,(nodes() + m2_elem()-1)*sizeof(double));
-
 		memcpy(b_curr_sparse, b_sparse,(nodes() + m2_elem()-1)*sizeof(double));
-
 
 		//compute mna with trap or euler
 		if(!if_BE) {
@@ -344,13 +327,10 @@ int tran_sol(struct element *head, unsigned long int *print_node, int index_prin
 			compute_mna_transient_sparse(1.0, nodes(), m2_elem() );
 		}
 
-
-		// printf("----C----\n");
-		// cs_di_print (compressed_MNA,0);
 		while(timestamp <= fin_time) {
 			compressed_MNA = memcopy_compressed_matrices(compressed_MNA, MNA_tran_sparse, nodes(), m2_elem());
 			
-			memcpy(e_prev_sparse, b_sparse,(nodes() + m2_elem() - 1)*sizeof(double));
+			memcpy(b_sparse, b_curr_sparse,(nodes() + m2_elem() - 1)*sizeof(double));
 			
 			//upologismos mna gia kathe timestamp
 			constructor_tran_sparse(nodes(),m2_elem(), head, timestamp); //calculates the e(tk) and not the b 
@@ -358,17 +338,45 @@ int tran_sol(struct element *head, unsigned long int *print_node, int index_prin
 			memcpy(e_sparse, b_sparse,(nodes() + m2_elem()-1)*sizeof(double));  //the above save the e(tk) to the b, so we must copy it to the right variable
 			b_tran_constructor_sparse(nodes(),m2_elem(), time_step);
 			
-			printf("Computing x with LU analysis \n");
-     		sparse_LU_analysis(nodes(), m2_elem());
-			for(i = 0; i<(nodes() + m2_elem()-1); i++) {
-				printf("%d: %lf\n", i, x_sparse[i] );
+
+			if(if_cholesky){
+				printf("Computing x with Cholesky analysis \n");
+				sparse_Cholesky_analysis(nodes(),m2_elem());
+			}
+			else if(if_CG){
+				printf("Computing x with CG analysis \n");
+				sparse_CG_analysis(nodes(),m2_elem());
+			}
+			else if(if_Bi_CG){
+				printf("Computing x with Bi_CG analysis \n");
+				sparse_Bi_CG_analysis(nodes(),m2_elem());
+			}
+			else{
+				printf("Computing x with LU analysis \n");
+			 	sparse_LU_analysis(nodes(),m2_elem());
+			}
+
+		
+			
+			for(j=0; j<index_print;j++){
+				for(i=0;i<(nodes()-1); i++){
+					if(x_help[i] == print_node[j]){
+						position = i;
+						break;
+					}
+				}
+				fprintf(fd[j], "%.14lf ",timestamp);
+				value = x_sparse[position];
+				fprintf(fd[j], "%.14lf \n",value);
+				
 			}
 
 			timestamp += time_step;
 		}
-		// print_x();	
-		// plot(head);
+
     	memcpy(b_sparse, b_curr_sparse, (nodes() + m2_elem()-1)*sizeof(double));
+		compressed_MNA = memcopy_compressed_matrices(compressed_MNA, mna_curr_sparse, nodes(), m2_elem());
+
 		free(b_curr_sparse);
 		free(e_prev_sparse);
 	}
